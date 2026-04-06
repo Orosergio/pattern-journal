@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import JournalEntry from "@/components/JournalEntry";
 import Dashboard from "@/components/Dashboard";
 import EntryHistory from "@/components/EntryHistory";
+import LandingPage from "@/components/LandingPage";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -26,15 +27,6 @@ export default function Home() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -42,81 +34,163 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading...</div>
+      <div style={{
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        background: "var(--bg)"
+      }}>
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 16
+        }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: "50%",
+            border: "2px solid var(--border)", borderTopColor: "var(--accent)",
+            animation: "spin 0.8s linear infinite"
+          }} />
+          <span style={{ color: "var(--text-dim)", fontSize: 14 }}>Loading...</span>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
       </div>
     );
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md px-6">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Pattern<span className="text-emerald-400">Journal</span>
-          </h1>
-          <p className="text-gray-400">
-            AI-powered journaling that detects emotional patterns and helps you understand yourself better.
-          </p>
-          <button
-            onClick={handleLogin}
-            className="bg-white text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-3 mx-auto"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-            </svg>
-            Sign in with Google
-          </button>
-        </div>
-      </div>
-    );
+    return <LandingPage />;
   }
 
+  const tabs = [
+    { key: "write" as const, label: "Write", icon: "✏️" },
+    { key: "dashboard" as const, label: "Dashboard", icon: "📊" },
+    { key: "history" as const, label: "History", icon: "📖" },
+  ];
+
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
       {/* Header */}
-      <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">
-          Pattern<span className="text-emerald-400">Journal</span>
-        </h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-400">{user.email}</span>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
-          >
-            Sign out
-          </button>
+      <header style={{
+        position: "sticky", top: 0, zIndex: 50,
+        background: "rgba(10,10,11,0.85)", backdropFilter: "blur(20px)",
+        borderBottom: "1px solid var(--border)",
+        padding: "0 24px",
+      }}>
+        <div style={{
+          maxWidth: 900, margin: "0 auto",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          height: 60
+        }}>
+          <div style={{
+            fontFamily: "var(--sans)", fontWeight: 700, fontSize: 17,
+            letterSpacing: "-0.02em"
+          }}>
+            Pattern<span style={{ color: "var(--accent)" }}>Journal</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <span style={{
+              fontSize: 13, color: "var(--text-dim)",
+              display: "none",
+            }} className="hide-mobile">
+              {user.email}
+            </span>
+            <button
+              onClick={handleLogout}
+              style={{
+                fontSize: 13, color: "var(--text-dim)",
+                background: "none", border: "1px solid var(--border)",
+                padding: "6px 14px", borderRadius: 8, cursor: "pointer",
+                fontFamily: "var(--sans)", fontWeight: 500,
+                transition: "all 0.2s",
+              }}
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Tabs */}
-      <nav className="border-b border-gray-800 px-6">
-        <div className="flex gap-6">
-          {(["write", "dashboard", "history"] as const).map((tab) => (
+      {/* Tab Navigation */}
+      <nav style={{
+        position: "sticky", top: 60, zIndex: 40,
+        background: "rgba(10,10,11,0.85)", backdropFilter: "blur(20px)",
+        borderBottom: "1px solid var(--border)",
+        padding: "0 24px",
+      }}>
+        <div style={{
+          maxWidth: 900, margin: "0 auto",
+          display: "flex", gap: 4
+        }}>
+          {tabs.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-                  ? "border-emerald-400 text-emerald-400"
-                  : "border-transparent text-gray-500 hover:text-gray-300"
-                }`}
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "12px 16px",
+                fontSize: 14, fontWeight: activeTab === tab.key ? 600 : 500,
+                fontFamily: "var(--sans)",
+                color: activeTab === tab.key ? "var(--accent)" : "var(--text-dim)",
+                background: activeTab === tab.key ? "var(--accent-dim)" : "transparent",
+                border: "none",
+                borderRadius: "8px 8px 0 0",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                borderBottom: activeTab === tab.key ? "2px solid var(--accent)" : "2px solid transparent",
+              }}
             >
-              {tab === "write" ? "Write" : tab === "dashboard" ? "Dashboard" : "History"}
+              <span style={{ fontSize: 15 }}>{tab.icon}</span>
+              {tab.label}
             </button>
           ))}
         </div>
       </nav>
 
       {/* Content */}
-      <main className="max-w-3xl mx-auto px-6 py-8">
+      <main style={{
+        maxWidth: 900, margin: "0 auto",
+        padding: "32px 24px 80px",
+        animation: "fadeIn 0.3s ease",
+      }}>
         {activeTab === "write" && <JournalEntry userId={user.id} />}
         {activeTab === "dashboard" && <Dashboard userId={user.id} />}
         {activeTab === "history" && <EntryHistory userId={user.id} />}
       </main>
+
+      {/* Mobile bottom nav */}
+      <nav style={{
+        position: "fixed", bottom: 0, left: 0, right: 0,
+        background: "rgba(10,10,11,0.95)", backdropFilter: "blur(20px)",
+        borderTop: "1px solid var(--border)",
+        display: "none", // Will show on mobile via media query
+        padding: "8px 16px env(safe-area-inset-bottom, 8px)",
+        zIndex: 50,
+      }} className="mobile-bottom-nav">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              flex: 1, display: "flex", flexDirection: "column",
+              alignItems: "center", gap: 4,
+              padding: "8px 0",
+              fontSize: 11, fontWeight: activeTab === tab.key ? 600 : 400,
+              fontFamily: "var(--sans)",
+              color: activeTab === tab.key ? "var(--accent)" : "var(--text-dim)",
+              background: "none", border: "none", cursor: "pointer",
+            }}
+          >
+            <span style={{ fontSize: 20 }}>{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .mobile-bottom-nav { display: flex !important; }
+          .hide-mobile { display: none !important; }
+        }
+        @media (min-width: 641px) {
+          .hide-mobile { display: inline !important; }
+        }
+      `}</style>
     </div>
   );
 }

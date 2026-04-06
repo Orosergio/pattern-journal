@@ -2,159 +2,256 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
 import { format } from "date-fns";
 
 interface Entry {
-    id: string;
-    emotions: string[];
-    themes: string[];
-    sentiment_score: number;
-    created_at: string;
+  id: string;
+  emotions: string[];
+  themes: string[];
+  sentiment_score: number;
+  created_at: string;
 }
 
 export default function Dashboard({ userId }: { userId: string }) {
-    const [entries, setEntries] = useState<Entry[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    useEffect(() => {
-        const fetchEntries = async () => {
-            const { data, error: dbError } = await supabase
-                .from("entries")
-                .select("id, emotions, themes, sentiment_score, created_at")
-                .eq("user_id", userId)
-                .order("created_at", { ascending: true })
-                .limit(30);
+  useEffect(() => {
+    const fetchEntries = async () => {
+      const { data, error: dbError } = await supabase
+        .from("entries")
+        .select("id, emotions, themes, sentiment_score, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true })
+        .limit(30);
 
-            if (dbError) {
-                setError("Failed to load dashboard data. Please try again.");
-            } else {
-                setEntries(data || []);
-            }
-            setLoading(false);
-        };
-        fetchEntries();
-    }, [userId]);
+      if (dbError) {
+        setError("Failed to load entries.");
+        console.error(dbError);
+      }
+      setEntries(data || []);
+      setLoading(false);
+    };
+    fetchEntries();
+  }, [userId]);
 
-    if (loading) return <div className="text-gray-400 animate-pulse">Loading dashboard...</div>;
-
-    if (error) return <div className="text-red-400 text-sm py-4">{error}</div>;
-
-    if (entries.length === 0) {
-        return (
-            <div className="text-center py-12">
-                <p className="text-gray-400">No entries yet. Start writing to see your emotional patterns.</p>
-            </div>
-        );
-    }
-
-    // Sentiment over time chart data
-    const chartData = entries.map((e) => ({
-        date: format(new Date(e.created_at), "MMM d"),
-        sentiment: e.sentiment_score,
-    }));
-
-    // Emotion frequency
-    const emotionCounts: Record<string, number> = {};
-    entries.forEach((e) => {
-        e.emotions?.forEach((emotion: string) => {
-            emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
-        });
-    });
-    const topEmotions = Object.entries(emotionCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 8);
-
-    // Theme frequency
-    const themeCounts: Record<string, number> = {};
-    entries.forEach((e) => {
-        e.themes?.forEach((theme: string) => {
-            themeCounts[theme] = (themeCounts[theme] || 0) + 1;
-        });
-    });
-    const topThemes = Object.entries(themeCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6);
-
-    // Average sentiment
-    const avgSentiment = entries.length > 0
-        ? entries.reduce((sum, e) => sum + (e.sentiment_score ?? 0), 0) / entries.length
-        : 0;
-
+  if (loading) {
     return (
-        <div className="space-y-8">
-            <h2 className="text-2xl font-semibold">Your Emotional Patterns</h2>
-
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-                    <span className="text-xs text-gray-500 uppercase tracking-wider">Total Entries</span>
-                    <p className="text-2xl font-bold mt-1">{entries.length}</p>
-                </div>
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-                    <span className="text-xs text-gray-500 uppercase tracking-wider">Avg Sentiment</span>
-                    <p className={`text-2xl font-bold mt-1 ${avgSentiment > 0.3 ? "text-emerald-400" : avgSentiment < -0.3 ? "text-red-400" : "text-yellow-400"}`}>
-                        {avgSentiment.toFixed(2)}
-                    </p>
-                </div>
-                <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-                    <span className="text-xs text-gray-500 uppercase tracking-wider">Top Emotion</span>
-                    <p className="text-2xl font-bold mt-1 text-emerald-400">{topEmotions[0]?.[0] || "—"}</p>
-                </div>
-            </div>
-
-            {/* Sentiment chart */}
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                <h3 className="font-medium mb-4">Sentiment Over Time</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                        <XAxis dataKey="date" stroke="#6b7280" fontSize={12} />
-                        <YAxis domain={[-1, 1]} stroke="#6b7280" fontSize={12} />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: "#111827", border: "1px solid #1f2937", borderRadius: "8px" }}
-                            labelStyle={{ color: "#9ca3af" }}
-                        />
-                        <Line type="monotone" dataKey="sentiment" stroke="#34d399" strokeWidth={2} dot={{ fill: "#34d399", r: 4 }} />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
-
-            {/* Top emotions */}
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                <h3 className="font-medium mb-3">Most Frequent Emotions</h3>
-                <div className="space-y-2">
-                    {topEmotions.map(([emotion, count]) => (
-                        <div key={emotion} className="flex items-center gap-3">
-                            <div className="flex-1">
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span>{emotion}</span>
-                                    <span className="text-gray-500">{count}x</span>
-                                </div>
-                                <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-emerald-400 rounded-full"
-                                        style={{ width: `${(count / topEmotions[0][1]) * 100}%` }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Top themes */}
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                <h3 className="font-medium mb-3">Recurring Themes</h3>
-                <div className="flex flex-wrap gap-2">
-                    {topThemes.map(([theme, count]) => (
-                        <span key={theme} className="bg-violet-400/10 text-violet-400 px-3 py-1.5 rounded-full text-sm">
-                            {theme} ({count})
-                        </span>
-                    ))}
-                </div>
-            </div>
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, animation: "fadeIn 0.3s ease" }}>
+        {[1, 2, 3].map(i => (
+          <div key={i} style={{
+            height: i === 1 ? 80 : i === 2 ? 280 : 160,
+            background: "var(--bg-card)", borderRadius: 16,
+            border: "1px solid var(--border)",
+            backgroundImage: "linear-gradient(90deg, var(--bg-card) 0%, var(--bg-card-hover) 50%, var(--bg-card) 100%)",
+            backgroundSize: "200% 100%",
+            animation: "shimmer 1.5s infinite"
+          }} />
+        ))}
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div style={{
+        background: "var(--rose-dim)", border: "1px solid rgba(251,113,133,0.15)",
+        borderRadius: 12, padding: 16, fontSize: 13, color: "var(--rose)"
+      }}>{error}</div>
+    );
+  }
+
+  if (entries.length === 0) {
+    return (
+      <div style={{
+        textAlign: "center", padding: "80px 24px",
+        animation: "fadeIn 0.4s ease"
+      }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
+        <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, fontWeight: 400, marginBottom: 8 }}>
+          No patterns yet
+        </h3>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, maxWidth: 360, margin: "0 auto" }}>
+          Start writing journal entries to see your emotional patterns emerge over time.
+        </p>
+      </div>
+    );
+  }
+
+  const chartData = entries.map((e) => ({
+    date: format(new Date(e.created_at), "MMM d"),
+    sentiment: e.sentiment_score ?? 0,
+  }));
+
+  const emotionCounts: Record<string, number> = {};
+  entries.forEach((e) => {
+    e.emotions?.forEach((emotion: string) => {
+      emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+    });
+  });
+  const topEmotions = Object.entries(emotionCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  const themeCounts: Record<string, number> = {};
+  entries.forEach((e) => {
+    e.themes?.forEach((theme: string) => {
+      themeCounts[theme] = (themeCounts[theme] || 0) + 1;
+    });
+  });
+  const topThemes = Object.entries(themeCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  const avgSentiment = entries.length > 0
+    ? entries.reduce((sum, e) => sum + (e.sentiment_score ?? 0), 0) / entries.length
+    : 0;
+
+  const getSentimentColor = (score: number) => {
+    if (score > 0.3) return "var(--accent)";
+    if (score < -0.3) return "var(--rose)";
+    return "var(--amber)";
+  };
+
+  const tagColors = [
+    { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(110,231,183,0.15)" },
+    { bg: "var(--violet-dim)", color: "var(--violet)", border: "rgba(167,139,250,0.15)" },
+    { bg: "var(--rose-dim)", color: "var(--rose)", border: "rgba(251,113,133,0.15)" },
+    { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(251,191,36,0.15)" },
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, animation: "slideUp 0.4s ease" }}>
+      {/* Title */}
+      <h2 style={{
+        fontFamily: "var(--serif)", fontSize: "clamp(24px, 4vw, 32px)",
+        fontWeight: 400, lineHeight: 1.2
+      }}>
+        Your Emotional Patterns
+      </h2>
+
+      {/* Stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+        {[
+          { label: "Total Entries", value: entries.length.toString(), color: "var(--text)" },
+          { label: "Avg Sentiment", value: avgSentiment.toFixed(2), color: getSentimentColor(avgSentiment) },
+          { label: "Top Emotion", value: topEmotions[0]?.[0] || "—", color: "var(--accent)" },
+        ].map((stat) => (
+          <div key={stat.label} style={{
+            background: "var(--bg-card)", border: "1px solid var(--border)",
+            borderRadius: 14, padding: "20px 24px",
+            transition: "all 0.2s"
+          }}>
+            <div style={{
+              fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em",
+              color: "var(--text-dim)", fontWeight: 600, marginBottom: 6
+            }}>{stat.label}</div>
+            <div style={{
+              fontSize: 24, fontWeight: 700, color: stat.color,
+              letterSpacing: "-0.02em"
+            }}>{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Chart */}
+      <div style={{
+        background: "var(--bg-card)", border: "1px solid var(--border)",
+        borderRadius: 16, padding: "24px 24px 16px",
+      }}>
+        <div style={{
+          fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em",
+          color: "var(--text-dim)", fontWeight: 600, marginBottom: 20
+        }}>Sentiment Over Time</div>
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis dataKey="date" stroke="var(--text-dim)" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis domain={[-1, 1]} stroke="var(--text-dim)" fontSize={11} tickLine={false} axisLine={false} width={35} />
+            <ReferenceLine y={0} stroke="var(--border-light)" strokeDasharray="3 3" />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--bg-card)",
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                fontSize: 13,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.3)"
+              }}
+              labelStyle={{ color: "var(--text-dim)" }}
+              itemStyle={{ color: "var(--accent)" }}
+            />
+            <Line
+              type="monotone"
+              dataKey="sentiment"
+              stroke="var(--accent)"
+              strokeWidth={2}
+              dot={{ fill: "var(--accent)", r: 4, strokeWidth: 0 }}
+              activeDot={{ r: 6, fill: "var(--accent)", strokeWidth: 2, stroke: "var(--bg)" }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Emotions */}
+      <div style={{
+        background: "var(--bg-card)", border: "1px solid var(--border)",
+        borderRadius: 16, padding: 24,
+      }}>
+        <div style={{
+          fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em",
+          color: "var(--text-dim)", fontWeight: 600, marginBottom: 16
+        }}>Most Frequent Emotions</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {topEmotions.map(([emotion, count], i) => (
+            <div key={`${emotion}-${i}`} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{
+                fontSize: 13, fontWeight: 500, minWidth: 100,
+                color: "var(--text-muted)"
+              }}>{emotion}</span>
+              <div style={{ flex: 1, height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{
+                  height: "100%",
+                  width: `${(count / topEmotions[0][1]) * 100}%`,
+                  background: tagColors[i % tagColors.length].color,
+                  borderRadius: 3,
+                  transition: "width 0.5s ease"
+                }} />
+              </div>
+              <span style={{ fontSize: 12, color: "var(--text-dim)", minWidth: 24, textAlign: "right" }}>
+                {count}×
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Themes */}
+      {topThemes.length > 0 && (
+        <div style={{
+          background: "var(--bg-card)", border: "1px solid var(--border)",
+          borderRadius: 16, padding: 24,
+        }}>
+          <div style={{
+            fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em",
+            color: "var(--text-dim)", fontWeight: 600, marginBottom: 16
+          }}>Recurring Themes</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {topThemes.map(([theme, count], i) => (
+              <span key={`${theme}-${i}`} style={{
+                padding: "8px 16px", borderRadius: 100,
+                fontSize: 13, fontWeight: 500,
+                background: tagColors[i % tagColors.length].bg,
+                color: tagColors[i % tagColors.length].color,
+                border: `1px solid ${tagColors[i % tagColors.length].border}`,
+              }}>
+                {theme} ({count})
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

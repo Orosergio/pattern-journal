@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
-  title: "Pattern Journal",
-  description: "AI-powered emotional pattern recognition journaling",
+  title: "Pattern Journal — AI Emotion Detection Journaling",
+  description: "AI-powered journaling that detects emotional patterns, surfaces recurring themes, and helps you understand yourself better.",
 };
 
 export default function RootLayout({
@@ -16,9 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-950 text-gray-100 min-h-screen`}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
