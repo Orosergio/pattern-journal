@@ -82,12 +82,18 @@ export default function Dashboard({ userId }: { userId: string }) {
 
   const streakStats = useMemo(() => calcStreaks(entries), [entries]);
 
-  const thisWeekCount = useMemo(() => {
+  // Count unique calendar DAYS with at least 1 entry in the past 7 days
+  const daysJournaledThisWeek = useMemo(() => {
     const since = startOfDay(subDays(new Date(), 6)).getTime();
-    return entries.filter((e) => new Date(e.created_at).getTime() >= since).length;
+    const uniqueDays = new Set(
+      entries
+        .filter((e) => new Date(e.created_at).getTime() >= since)
+        .map((e) => format(new Date(e.created_at), "yyyy-MM-dd"))
+    );
+    return uniqueDays.size;
   }, [entries]);
 
-  const weeklyConsistency = Math.round((thisWeekCount / 7) * 100);
+  const weeklyConsistency = Math.min(100, Math.round((daysJournaledThisWeek / 7) * 100));
 
   if (loading) {
     return (
@@ -187,7 +193,7 @@ export default function Dashboard({ userId }: { userId: string }) {
     },
     {
       label: "This Week",
-      value: `${thisWeekCount}/7`,
+      value: `${daysJournaledThisWeek}/7 days`,
       icon: "📅",
       color: "var(--accent)",
       bg: "var(--accent-dim)",

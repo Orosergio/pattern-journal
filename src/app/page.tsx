@@ -108,13 +108,16 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Tab Navigation */}
-      <nav style={{
-        position: "sticky", top: 60, zIndex: 40,
-        background: "rgba(10,10,11,0.85)", backdropFilter: "blur(20px)",
-        borderBottom: "1px solid var(--border)",
-        padding: "0 24px",
-      }}>
+      {/* Tab Navigation — desktop only; mobile uses the bottom nav */}
+      <nav
+        className="desktop-tab-nav"
+        style={{
+          position: "sticky", top: 60, zIndex: 40,
+          background: "rgba(10,10,11,0.85)", backdropFilter: "blur(20px)",
+          borderBottom: "1px solid var(--border)",
+          padding: "0 24px",
+        }}
+      >
         <div style={{
           maxWidth: 900, margin: "0 auto",
           display: "flex", gap: 4
@@ -135,6 +138,7 @@ export default function Home() {
                 cursor: "pointer",
                 transition: "all 0.2s",
                 borderBottom: activeTab === tab.key ? "2px solid var(--accent)" : "2px solid transparent",
+                whiteSpace: "nowrap",
               }}
             >
               <span style={{ fontSize: 15 }}>{tab.icon}</span>
@@ -145,11 +149,14 @@ export default function Home() {
       </nav>
 
       {/* Content */}
-      <main style={{
-        maxWidth: 900, margin: "0 auto",
-        padding: "32px 24px 80px",
-        animation: "fadeIn 0.3s ease",
-      }}>
+      <main
+        className="main-content"
+        style={{
+          maxWidth: 900, margin: "0 auto",
+          padding: "32px 24px 40px",
+          animation: "fadeIn 0.3s ease",
+        }}
+      >
         {activeTab === "write" && <JournalEntry userId={user.id} />}
         {activeTab === "dashboard" && <Dashboard userId={user.id} />}
         {activeTab === "history" && <EntryHistory userId={user.id} />}
@@ -159,10 +166,10 @@ export default function Home() {
       {/* Mobile bottom nav */}
       <nav style={{
         position: "fixed", bottom: 0, left: 0, right: 0,
-        background: "rgba(10,10,11,0.95)", backdropFilter: "blur(20px)",
+        background: "rgba(10,10,11,0.97)", backdropFilter: "blur(20px)",
         borderTop: "1px solid var(--border)",
-        display: "none", // Will show on mobile via media query
-        padding: "8px 16px env(safe-area-inset-bottom, 8px)",
+        display: "none",
+        padding: "6px 8px env(safe-area-inset-bottom, 6px)",
         zIndex: 50,
       }} className="mobile-bottom-nav">
         {tabs.map((tab) => (
@@ -171,26 +178,31 @@ export default function Home() {
             onClick={() => setActiveTab(tab.key)}
             style={{
               flex: 1, display: "flex", flexDirection: "column",
-              alignItems: "center", gap: 4,
-              padding: "8px 0",
-              fontSize: 11, fontWeight: activeTab === tab.key ? 600 : 400,
+              alignItems: "center", gap: 3,
+              padding: "6px 0",
+              fontSize: 10, fontWeight: activeTab === tab.key ? 600 : 400,
               fontFamily: "var(--sans)",
               color: activeTab === tab.key ? "var(--accent)" : "var(--text-dim)",
               background: "none", border: "none", cursor: "pointer",
+              letterSpacing: "0.01em",
             }}
           >
-            <span style={{ fontSize: 20 }}>{tab.icon}</span>
+            <span style={{ fontSize: 19 }}>{tab.icon}</span>
             {tab.label}
           </button>
         ))}
       </nav>
 
       <style>{`
+        /* Mobile: hide desktop tab nav, show bottom nav */
         @media (max-width: 640px) {
+          .desktop-tab-nav { display: none !important; }
           .mobile-bottom-nav { display: flex !important; }
           .hide-mobile { display: none !important; }
+          .main-content { padding-bottom: 90px !important; }
         }
         @media (min-width: 641px) {
+          .desktop-tab-nav { display: block !important; }
           .hide-mobile { display: inline !important; }
         }
       `}</style>
