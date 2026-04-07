@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 
@@ -18,6 +18,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -26,7 +27,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(50);
 
       if (dbError) {
         setError("Failed to load entries.");
@@ -37,6 +38,22 @@ export default function EntryHistory({ userId }: { userId: string }) {
     };
     fetchEntries();
   }, [userId]);
+
+  // Collect unique themes across all entries
+  const allThemes = useMemo(() => {
+    const counts: Record<string, number> = {};
+    entries.forEach((e) => {
+      e.themes?.forEach((t) => {
+        counts[t] = (counts[t] || 0) + 1;
+      });
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([t]) => t);
+  }, [entries]);
+
+  const filteredEntries = useMemo(() => {
+    if (!selectedTheme) return entries;
+    return entries.filter((e) => e.themes?.includes(selectedTheme));
+  }, [entries, selectedTheme]);
 
   const tagColors = [
     { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(110,231,183,0.15)" },
@@ -79,10 +96,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
 
   if (entries.length === 0) {
     return (
-      <div style={{
-        textAlign: "center", padding: "80px 24px",
-        animation: "fadeIn 0.4s ease"
-      }}>
+      <div style={{ textAlign: "center", padding: "80px 24px", animation: "fadeIn 0.4s ease" }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>📖</div>
         <h3 style={{ fontFamily: "var(--serif)", fontSize: 24, fontWeight: 400, marginBottom: 8 }}>
           No entries yet
@@ -95,20 +109,83 @@ export default function EntryHistory({ userId }: { userId: string }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, animation: "slideUp 0.4s ease" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20, animation: "slideUp 0.4s ease" }}>
+      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{
-          fontFamily: "var(--serif)", fontSize: "clamp(24px, 4vw, 32px)",
-          fontWeight: 400, lineHeight: 1.2
-        }}>
+        <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 400, lineHeight: 1.2 }}>
           Entry History
         </h2>
         <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
-          {entries.length} {entries.length === 1 ? "entry" : "entries"}
+          {filteredEntries.length}
+          {selectedTheme ? ` of ${entries.length}` : ""} {entries.length === 1 ? "entry" : "entries"}
         </span>
       </div>
 
-      {entries.map((entry, index) => (
+      {/* Theme Filter Bar */}
+      {allThemes.length > 0 && (
+        <div style={{
+          display: "flex", flexWrap: "wrap", gap: 8,
+          padding: "14px 16px",
+          background: "var(--bg-card)", border: "1px solid var(--border)",
+          borderRadius: 14,
+        }}>
+          {/* All pill */}
+          <button
+            onClick={() => setSelectedTheme(null)}
+            style={{
+              padding: "6px 16px", borderRadius: 100,
+              fontSize: 13, fontWeight: selectedTheme === null ? 600 : 500,
+              background: selectedTheme === null ? "var(--accent)" : "transparent",
+              color: selectedTheme === null ? "#0a0a0b" : "var(--text-dim)",
+              border: selectedTheme === null ? "1px solid transparent" : "1px solid var(--border)",
+              cursor: "pointer",
+              transition: "all 0.18s",
+              fontFamily: "var(--sans)",
+            }}
+          >
+            All
+          </button>
+
+          {allThemes.map((theme, i) => {
+            const active = selectedTheme === theme;
+            const c = tagColors[i % tagColors.length];
+            return (
+              <button
+                key={theme}
+                onClick={() => setSelectedTheme(active ? null : theme)}
+                style={{
+                  padding: "6px 16px", borderRadius: 100,
+                  fontSize: 13, fontWeight: active ? 600 : 500,
+                  background: active ? c.color : c.bg,
+                  color: active ? "#0a0a0b" : c.color,
+                  border: `1px solid ${active ? c.color : c.border}`,
+                  cursor: "pointer",
+                  transition: "all 0.18s",
+                  fontFamily: "var(--sans)",
+                }}
+              >
+                {theme}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Empty filtered state */}
+      {filteredEntries.length === 0 && selectedTheme && (
+        <div style={{
+          textAlign: "center", padding: "48px 24px",
+          background: "var(--bg-card)", border: "1px solid var(--border)",
+          borderRadius: 16,
+        }}>
+          <p style={{ color: "var(--text-dim)", fontSize: 14 }}>
+            No entries tagged with &ldquo;{selectedTheme}&rdquo;.
+          </p>
+        </div>
+      )}
+
+      {/* Entry list */}
+      {filteredEntries.map((entry, index) => (
         <div
           key={entry.id}
           style={{
@@ -116,7 +193,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
             borderRadius: 16, overflow: "hidden",
             transition: "all 0.2s",
             animation: `slideUp 0.4s ease`,
-            animationDelay: `${index * 0.05}s`,
+            animationDelay: `${index * 0.04}s`,
             animationFillMode: "backwards"
           }}
         >
@@ -146,10 +223,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
 
           {/* Content */}
           <div style={{ padding: "20px 24px" }}>
-            <p style={{
-              fontSize: 14, color: "var(--text-muted)",
-              lineHeight: 1.7, marginBottom: 16
-            }}>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16 }}>
               {entry.content}
             </p>
 
@@ -164,26 +238,32 @@ export default function EntryHistory({ userId }: { userId: string }) {
                   }}>{e}</span>
                 );
               })}
-              {entry.themes?.map((t: string, i: number) => (
-                <span key={`${entry.id}-t-${t}`} style={{
-                  padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: 500,
-                  background: "var(--violet-dim)", color: "var(--violet)",
-                  border: "1px solid rgba(167,139,250,0.15)"
-                }}>{t}</span>
-              ))}
+              {entry.themes?.map((t: string, i: number) => {
+                const active = selectedTheme === t;
+                return (
+                  <button
+                    key={`${entry.id}-t-${t}`}
+                    onClick={() => setSelectedTheme(active ? null : t)}
+                    style={{
+                      padding: "4px 12px", borderRadius: 100, fontSize: 12, fontWeight: active ? 600 : 500,
+                      background: active ? "var(--violet)" : "var(--violet-dim)",
+                      color: active ? "#0a0a0b" : "var(--violet)",
+                      border: active ? "1px solid var(--violet)" : "1px solid rgba(167,139,250,0.15)",
+                      cursor: "pointer",
+                      fontFamily: "var(--sans)",
+                      transition: "all 0.15s",
+                    }}
+                  >{t}</button>
+                );
+              })}
             </div>
 
             {/* Reflection */}
             {entry.reflection_prompt && (
-              <div style={{
-                marginTop: 16, paddingTop: 16,
-                borderTop: "1px solid var(--border)"
-              }}>
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
                 <p style={{
                   fontSize: 13, fontStyle: "italic", color: "var(--text-dim)",
-                  lineHeight: 1.6,
-                  paddingLeft: 12,
-                  borderLeft: "2px solid var(--accent-dim)"
+                  lineHeight: 1.6, paddingLeft: 12, borderLeft: "2px solid var(--accent-dim)"
                 }}>
                   {entry.reflection_prompt}
                 </p>

@@ -7,11 +7,12 @@ import JournalEntry from "@/components/JournalEntry";
 import Dashboard from "@/components/Dashboard";
 import EntryHistory from "@/components/EntryHistory";
 import LandingPage from "@/components/LandingPage";
+import WeeklyInsight from "@/components/WeeklyInsight";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"write" | "dashboard" | "history">("write");
+  const [activeTab, setActiveTab] = useState<"write" | "dashboard" | "history" | "insights">("write");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -61,6 +62,7 @@ export default function Home() {
     { key: "write" as const, label: "Write", icon: "✏️" },
     { key: "dashboard" as const, label: "Dashboard", icon: "📊" },
     { key: "history" as const, label: "History", icon: "📖" },
+    { key: "insights" as const, label: "Insights", icon: "✨" },
   ];
 
   return (
@@ -151,6 +153,7 @@ export default function Home() {
         {activeTab === "write" && <JournalEntry userId={user.id} />}
         {activeTab === "dashboard" && <Dashboard userId={user.id} />}
         {activeTab === "history" && <EntryHistory userId={user.id} />}
+        {activeTab === "insights" && <WeeklyInsight userId={user.id} />}
       </main>
 
       {/* Mobile bottom nav */}
