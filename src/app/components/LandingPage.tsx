@@ -81,6 +81,47 @@ export default function LandingPage() {
           to { width: 18%; transform: translateX(-100%); }
         }
         @keyframes landFadeIn { to { opacity: 1; } }
+
+        /* Responsive classes */
+        .land-nav { display: flex; gap: 32px; align-items: center; }
+        .land-nav-links { display: flex; gap: 32px; align-items: center; }
+        .land-mobile-menu-btn { display: none; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px; cursor: pointer; color: var(--text-muted); }
+        .land-hero { padding: 140px 40px 80px; }
+        .land-hero h1 br { display: inline; }
+        .land-preview-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: 420px; }
+        .land-preview-write { padding: 40px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 20px; }
+        .land-preview-analysis { padding: 40px; display: flex; flex-direction: column; gap: 24px; background: rgba(255,255,255,0.01); }
+        .land-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .land-tech-bar { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; padding: 32px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .land-footer { display: flex; justify-content: space-between; align-items: center; }
+        .land-section-pad { padding-left: 40px; padding-right: 40px; }
+        .land-cta-buttons { display: flex; gap: 16px; }
+
+        @media (max-width: 768px) {
+          .land-nav-links a { display: none; }
+          .land-mobile-menu-btn { display: block; }
+          .land-hero { padding: 120px 20px 60px; }
+          .land-hero h1 br { display: none; }
+          .land-preview-grid { grid-template-columns: 1fr; }
+          .land-preview-write { padding: 24px; border-right: none; border-bottom: 1px solid var(--border); }
+          .land-preview-analysis { padding: 24px; }
+          .land-features-grid { grid-template-columns: 1fr; }
+          .land-tech-bar { gap: 16px; padding: 24px 0; }
+          .land-tech-bar .land-tech-dot { display: none; }
+          .land-footer { flex-direction: column; gap: 12px; text-align: center; }
+          .land-section-pad { padding-left: 20px; padding-right: 20px; }
+          .land-cta-buttons { flex-direction: column; align-items: stretch; }
+          .land-cta-buttons a, .land-cta-buttons button { justify-content: center; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+          .land-hero { padding: 110px 16px 48px; }
+          .land-preview-write { padding: 20px; }
+          .land-preview-analysis { padding: 20px; }
+          .land-section-pad { padding-left: 16px; padding-right: 16px; }
+          .land-tech-bar { gap: 12px; }
+          .land-tech-bar span { font-size: 11px !important; }
+        }
       `}</style>
 
             <div style={{ position: "relative", overflow: "hidden" }}>
@@ -101,7 +142,7 @@ export default function LandingPage() {
                     <div style={{ fontFamily: "var(--sans)", fontWeight: 700, fontSize: 18, letterSpacing: "-0.02em" }}>
                         Pattern<span style={{ color: "var(--accent)" }}>Journal</span>
                     </div>
-                    <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+                    <div className="land-nav-links">
                         <a href="#features" style={{ color: "var(--text-muted)", textDecoration: "none", fontSize: 14, fontWeight: 500 }}>Features</a>
                         <a href="#preview" style={{ color: "var(--text-muted)", textDecoration: "none", fontSize: 14, fontWeight: 500 }}>Preview</a>
                         <a href="https://github.com/Orosergio/pattern-journal" target="_blank" style={{ color: "var(--text-muted)", textDecoration: "none", fontSize: 14, fontWeight: 500 }}>GitHub</a>
@@ -112,13 +153,16 @@ export default function LandingPage() {
                             fontFamily: "var(--sans)"
                         }}>Sign in</button>
                     </div>
+                    <button className="land-mobile-menu-btn" onClick={handleLogin} aria-label="Sign in">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
+                    </button>
                 </nav>
 
                 {/* Hero */}
-                <section style={{
+                <section className="land-hero" style={{
                     position: "relative", minHeight: "100vh",
                     display: "flex", flexDirection: "column", justifyContent: "center",
-                    padding: "140px 40px 80px", maxWidth: 1200, margin: "0 auto"
+                    maxWidth: 1200, margin: "0 auto"
                 }}>
                     <div style={{
                         display: "inline-flex", alignItems: "center", gap: 8,
@@ -149,8 +193,8 @@ export default function LandingPage() {
                         Write freely. AI detects emotional patterns across your entries — surfacing recurring themes, sentiment shifts, and reflection prompts you'd miss on your own.
                     </p>
 
-                    <div style={{
-                        display: "flex", gap: 16, marginTop: 40, opacity: 0,
+                    <div className="land-cta-buttons" style={{
+                        marginTop: 40, opacity: 0,
                         animation: "landSlideUp 0.8s ease forwards", animationDelay: "0.8s"
                     }}>
                         <button onClick={handleLogin} style={{
@@ -174,8 +218,8 @@ export default function LandingPage() {
                 </section>
 
                 {/* Product Preview */}
-                <section id="preview" style={{
-                    maxWidth: 1200, margin: "0 auto", padding: "0 40px 120px",
+                <section id="preview" className="land-section-pad" style={{
+                    maxWidth: 1200, margin: "0 auto", paddingBottom: 120,
                     opacity: 0, animation: "landSlideUp 1s ease forwards", animationDelay: "1.2s"
                 }}>
                     <div style={{
@@ -197,9 +241,9 @@ export default function LandingPage() {
                             </div>
                         </div>
                         {/* Content */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: 420 }}>
+                        <div className="land-preview-grid">
                             {/* Write Panel */}
-                            <div style={{ padding: 40, borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 20 }}>
+                            <div className="land-preview-write">
                                 <div style={{ fontFamily: "var(--serif)", fontSize: 22, color: "var(--text)" }}>How are you feeling today?</div>
                                 <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Write freely. AI will detect patterns in your emotions.</div>
                                 <div style={{
@@ -218,7 +262,7 @@ export default function LandingPage() {
                                 }}>Analyze & Save</div>
                             </div>
                             {/* Analysis Panel */}
-                            <div style={{ padding: 40, display: "flex", flexDirection: "column", gap: 24, background: "rgba(255,255,255,0.01)" }}>
+                            <div className="land-preview-analysis">
                                 <div>
                                     <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-dim)", fontWeight: 600 }}>Emotions Detected</div>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
@@ -266,12 +310,12 @@ export default function LandingPage() {
                 </section>
 
                 {/* Features */}
-                <section id="features" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 40px 120px" }}>
+                <section id="features" className="land-section-pad" style={{ maxWidth: 1200, margin: "0 auto", paddingBottom: 120 }}>
                     <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-dim)", fontWeight: 600, marginBottom: 16 }}>What it does</div>
                     <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 60, maxWidth: 600, lineHeight: 1.15 }}>
                         More than a journal — a mirror for your mind.
                     </h2>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+                    <div className="land-features-grid">
                         {[
                             { icon: "🧠", bg: "var(--accent-dim)", title: "Emotion Detection", desc: "Every entry is analyzed by AI to identify 2-4 emotions, recurring themes, and overall sentiment — instantly." },
                             { icon: "📈", bg: "var(--violet-dim)", title: "Pattern Dashboard", desc: "Sentiment trends over time, most frequent emotions, and recurring life themes visualized in one view." },
@@ -290,23 +334,19 @@ export default function LandingPage() {
                 </section>
 
                 {/* Tech Stack */}
-                <section style={{ maxWidth: 1200, margin: "0 auto", padding: "0 40px 120px" }}>
-                    <div style={{
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        gap: 40, flexWrap: "wrap", padding: "32px 0",
-                        borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)"
-                    }}>
+                <section className="land-section-pad" style={{ maxWidth: 1200, margin: "0 auto", paddingBottom: 120 }}>
+                    <div className="land-tech-bar">
                         {["Next.js", "React", "TypeScript", "Supabase", "Google AI", "Vercel", "Recharts"].map((tech, i) => (
                             <span key={tech} style={{ display: "flex", alignItems: "center", gap: 40 }}>
                                 <span style={{ fontSize: 14, color: "var(--text-dim)", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase" }}>{tech}</span>
-                                {i < 6 && <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--border-light)" }} />}
+                                {i < 6 && <span className="land-tech-dot" style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--border-light)" }} />}
                             </span>
                         ))}
                     </div>
                 </section>
 
                 {/* CTA */}
-                <section style={{ textAlign: "center", padding: "80px 40px 120px", maxWidth: 600, margin: "0 auto" }}>
+                <section className="land-section-pad" style={{ textAlign: "center", paddingTop: 80, paddingBottom: 120, maxWidth: 600, margin: "0 auto" }}>
                     <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(28px, 3.5vw, 40px)", marginBottom: 16, lineHeight: 1.2 }}>
                         Start understanding yourself better.
                     </h2>
@@ -326,9 +366,8 @@ export default function LandingPage() {
                 </section>
 
                 {/* Footer */}
-                <footer style={{
-                    borderTop: "1px solid var(--border)", padding: "32px 40px",
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                <footer className="land-footer land-section-pad" style={{
+                    borderTop: "1px solid var(--border)", paddingTop: 32, paddingBottom: 32,
                     maxWidth: 1200, margin: "0 auto", fontSize: 13, color: "var(--text-dim)"
                 }}>
                     <span>Built by <a href="https://github.com/Orosergio" target="_blank" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Sergio Orozco</a> · NTUT Taipei</span>
