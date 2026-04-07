@@ -1,6 +1,6 @@
 # Pattern Journal
 
-**An AI-powered journaling app that detects emotional patterns, tracks sentiment over time, and generates weekly insight reports.**
+**An AI powered journaling app that detects emotional patterns, tracks sentiment over time, and generates weekly insight reports.**
 
 Write freely. The AI reads between the lines.
 
@@ -12,10 +12,10 @@ Write freely. The AI reads between the lines.
 
 ## What It Does
 
-Every journal entry gets analyzed by **Google Gemma 3 4B** in real time. No templates, no prompts to fill — just write what's on your mind and the AI surfaces what you can't see yourself.
+Every journal entry gets analyzed by **Google Gemma 3 4B** in real time. No templates, no prompts to fill, just write what's on your mind and the AI surfaces what you can't see yourself.
 
 **Per entry**, the AI returns:
-- 2–4 detected **emotions** (e.g. anxiety, excitement, relief)
+- 2-4 detected **emotions** (e.g. anxiety, excitement, relief)
 - Recurring **themes** (e.g. relationship issues, task management, personal growth)
 - A **sentiment score** from −1.0 to 1.0
 - A personalized **reflection prompt** to push deeper thinking
@@ -24,20 +24,18 @@ Every journal entry gets analyzed by **Google Gemma 3 4B** in real time. No temp
 - A **sentiment chart** tracking your emotional trajectory over time
 - **Emotion frequency bars** showing which feelings dominate your week
 - **Theme tags** you can filter and explore in your history
-- **Streak tracking** — current streak, longest streak, weekly consistency
+- **Streak tracking** - current streak, longest streak, weekly consistency
 
 **Weekly**, the AI generates:
 - An **Insight Report** analyzing all entries from the past 7 days
 - **Emotional trajectory** summary with direction (Improving / Declining / Stable)
-- **Identified patterns** — habits and behaviors you might not notice yourself
-- **Strengths** and **Watch Outs** — what you're doing well vs. what needs attention
+- **Identified patterns** - habits and behaviors you might not notice yourself
+- **Strengths** and **Watch Outs** - what you're doing well vs. what needs attention
 - **3 actionable recommendations** personalized to your week
 
 ---
 
 ## Screenshots
-
-> Replace these paths with your actual screenshot URLs after pushing to the repo.
 
 ### Landing Page
 ![Landing Page](./screenshots/landing.png)
@@ -45,7 +43,7 @@ Every journal entry gets analyzed by **Google Gemma 3 4B** in real time. No temp
 ### Write + AI Analysis
 ![Write Tab](./screenshots/write.png)
 
-### Dashboard — Sentiment & Emotion Tracking
+### Dashboard - Sentiment & Emotion Tracking
 ![Dashboard](./screenshots/dashboard.png)
 
 ### Entry History with Theme Filtering
@@ -99,10 +97,10 @@ Browser (Next.js Client)
 ```
 
 Key decisions:
-- **Gemma 3 4B over larger models** — Free tier, fast inference, good enough for emotion detection. The 4B parameter model keeps latency under 3s per analysis.
-- **Server-side API routes** — API key never touches the client. All AI calls go through Next.js API routes.
-- **Row Level Security** — Each user only sees their own entries. Enforced at the database level, not just the app level.
-- **No external state management** — React state + Supabase real-time queries. Simple is fast.
+- **Gemma 3 4B over larger models** - Free tier, fast inference, good enough for emotion detection. The 4B parameter model keeps latency under 3s per analysis.
+- **Server-side API routes** - API key never touches the client. All AI calls go through Next.js API routes.
+- **Row Level Security** - Each user only sees their own entries. Enforced at the database level, not just the app level.
+- **No external state management** - React state + Supabase real-time queries. Simple is fast.
 
 ---
 
@@ -168,10 +166,10 @@ src/app/
 
 This was a solo build from zero to production. Some things that clicked:
 
-- **Prompt engineering for structured output** — Getting Gemma 3 4B to consistently return valid JSON with emotions, themes, and sentiment took careful prompt design. Smaller models need tighter constraints.
-- **Supabase RLS is underrated** — Writing security policies in SQL that enforce per-user data isolation at the database level means the app code can stay simple without compromising security.
-- **AI meta-analysis is the real product** — Individual entry analysis is cool, but the Weekly Insight that cross-references all entries to find patterns is what makes this genuinely useful. That's where the value is.
-- **Design matters for portfolio projects** — Recruiters spend 10 seconds on your repo. A polished UI with a real design system (not default Tailwind) makes them stop scrolling.
+- **Prompt engineering for structured output** - Getting Gemma 3 4B to consistently return valid JSON with emotions, themes, and sentiment took careful prompt design. Smaller models need tighter constraints.
+- **Supabase RLS is underrated** - Writing security policies in SQL that enforce per-user data isolation at the database level means the app code can stay simple without compromising security.
+- **AI meta-analysis is the real product** - Individual entry analysis is cool, but the Weekly Insight that cross-references all entries to find patterns is what makes this genuinely useful. That's where the value is.
+- **Design matters for portfolio projects** - Recruiters spend 10 seconds on your repo. A polished UI with a real design system (not default Tailwind) makes them stop scrolling.
 
 ---
 
