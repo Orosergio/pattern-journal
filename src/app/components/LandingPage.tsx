@@ -182,7 +182,7 @@ export default function LandingPage() {
                         maxWidth: 800, opacity: 0,
                         animation: "landSlideUp 0.8s ease forwards", animationDelay: "0.4s"
                     }}>
-                        Understand your<br />emotions through<br /><em style={{ fontStyle: "italic", color: "var(--accent)" }}>pattern recognition.</em>
+                        Understand your<br />{" "}emotions through<br />{" "}<em style={{ fontStyle: "italic", color: "var(--accent)" }}>pattern recognition.</em>
                     </h1>
 
                     <p style={{
