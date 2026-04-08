@@ -3,11 +3,19 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+interface CoachingResult {
+  diagnosis: string;
+  framework: string;
+  action: string;
+  why: string;
+}
+
 interface AnalysisResult {
   emotions: string[];
   themes: string[];
   sentiment_score: number;
   reflection_prompt: string;
+  coaching: CoachingResult;
 }
 
 export default function JournalEntry({ userId }: { userId: string }) {
@@ -61,6 +69,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
         themes: result.themes,
         sentiment_score: result.sentiment_score,
         reflection_prompt: result.reflection_prompt,
+        coaching: result.coaching,
       });
 
       if (dbError) throw dbError;
@@ -315,6 +324,107 @@ export default function JournalEntry({ userId }: { userId: string }) {
                 }}>
                   {analysis.reflection_prompt}
                 </p>
+              </div>
+            )}
+
+            {/* AI Coach */}
+            {analysis.coaching && (
+              <div style={{
+                background: "linear-gradient(135deg, rgba(110,231,183,0.03) 0%, rgba(167,139,250,0.03) 100%)",
+                border: "1px solid var(--border)",
+                borderRadius: 14,
+                overflow: "hidden",
+                animation: "slideUp 0.5s ease"
+              }}>
+                {/* Coach header */}
+                <div style={{
+                  padding: "14px 20px",
+                  borderBottom: "1px solid var(--border)",
+                  display: "flex", alignItems: "center", gap: 10,
+                  background: "rgba(110,231,183,0.04)"
+                }}>
+                  <span style={{ fontSize: 18 }}>🧭</span>
+                  <span style={{
+                    fontSize: 12, fontWeight: 600, letterSpacing: "0.08em",
+                    textTransform: "uppercase", color: "var(--accent)"
+                  }}>AI Coach</span>
+                  <span style={{
+                    fontSize: 11, color: "var(--text-dim)", marginLeft: "auto",
+                    fontStyle: "italic"
+                  }}>Personalized for this entry</span>
+                </div>
+
+                <div className="coaching-content" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+                  {/* Diagnosis */}
+                  <div>
+                    <div style={{
+                      fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em",
+                      color: "var(--text-dim)", fontWeight: 600, marginBottom: 6
+                    }}>What I see</div>
+                    <p style={{
+                      fontSize: 14, color: "var(--text)", lineHeight: 1.6
+                    }}>
+                      {analysis.coaching.diagnosis}
+                    </p>
+                  </div>
+
+                  {/* Framework */}
+                  <div style={{
+                    background: "var(--accent-dim)",
+                    border: "1px solid rgba(110,231,183,0.12)",
+                    borderRadius: 10, padding: "14px 16px"
+                  }}>
+                    <div style={{
+                      fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em",
+                      color: "var(--accent)", fontWeight: 600, marginBottom: 6,
+                      display: "flex", alignItems: "center", gap: 6
+                    }}>
+                      <span style={{ fontSize: 12 }}>📚</span> Framework
+                    </div>
+                    <p style={{
+                      fontSize: 14, color: "var(--text)", lineHeight: 1.6
+                    }}>
+                      {analysis.coaching.framework}
+                    </p>
+                  </div>
+
+                  {/* Action */}
+                  <div style={{
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border)",
+                    borderLeft: "3px solid var(--violet)",
+                    borderRadius: 10, padding: "14px 16px"
+                  }}>
+                    <div style={{
+                      fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em",
+                      color: "var(--violet)", fontWeight: 600, marginBottom: 6,
+                      display: "flex", alignItems: "center", gap: 6
+                    }}>
+                      <span style={{ fontSize: 12 }}>⚡</span> Do this now
+                      <span style={{
+                        marginLeft: "auto", fontSize: 10,
+                        color: "var(--text-dim)", fontWeight: 400,
+                        fontStyle: "italic", textTransform: "none", letterSpacing: "normal"
+                      }}>~30 min or less</span>
+                    </div>
+                    <p style={{
+                      fontSize: 14, color: "var(--text)", lineHeight: 1.6,
+                      fontWeight: 500
+                    }}>
+                      {analysis.coaching.action}
+                    </p>
+                  </div>
+
+                  {/* Why */}
+                  <div style={{
+                    fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6,
+                    fontStyle: "italic", paddingLeft: 12,
+                    borderLeft: "2px solid var(--border)"
+                  }}>
+                    <span style={{ fontWeight: 600, fontStyle: "normal", color: "var(--text-dim)" }}>Why: </span>
+                    {analysis.coaching.why}
+                  </div>
+                </div>
               </div>
             )}
           </div>

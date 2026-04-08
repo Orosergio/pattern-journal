@@ -13,14 +13,20 @@ export async function POST(req: NextRequest) {
 
         const model = genAI.getGenerativeModel({ model: 'gemma-3-4b-it' })
 
-        const prompt = `You are an emotional intelligence analyst for a journaling app. Analyze the following journal entry and return ONLY a valid JSON object with no markdown formatting, no code blocks, no extra text.
+        const prompt = `You are an emotional intelligence analyst and personal development coach for a journaling app. Analyze the following journal entry and return ONLY a valid JSON object with no markdown formatting, no code blocks, no extra text.
 
 The JSON must have this exact structure:
 {
   "emotions": ["emotion1", "emotion2", "emotion3"],
   "themes": ["theme1", "theme2"],
   "sentiment_score": 0.0,
-  "reflection_prompt": "A thoughtful follow-up question"
+  "reflection_prompt": "A thoughtful follow-up question",
+  "coaching": {
+    "diagnosis": "One sentence identifying the core pattern or challenge in this entry",
+    "framework": "Name and briefly explain a real psychology, philosophy, or productivity concept that applies (e.g., Maslow's hierarchy, CBT cognitive distortions, Eisenhower matrix, Stoic dichotomy of control, habit loop theory, Kaizen, growth mindset, Parkinson's law, Pomodoro technique, journaling science, etc.)",
+    "action": "One specific, concrete action the user can take in the next 30 minutes",
+    "why": "One sentence explaining why this action works, grounded in the framework above"
+  }
 }
 
 Rules:
@@ -28,6 +34,13 @@ Rules:
 - "themes": array of 1-3 recurring themes (e.g., "work stress", "personal growth", "relationships")
 - "sentiment_score": float from -1.0 (very negative) to 1.0 (very positive), 0.0 is neutral
 - "reflection_prompt": one thoughtful question that helps the user reflect deeper
+- "coaching": an object with exactly 4 keys: diagnosis, framework, action, why
+  - "diagnosis": identify what the user is actually struggling with, not surface-level
+  - "framework": reference a REAL concept from psychology, philosophy, neuroscience, or productivity research. Be specific — name the theory, the researcher, or the book. Do NOT make up frameworks.
+  - "action": must be doable RIGHT NOW in under 30 minutes. Not vague advice like "be more mindful" — give a specific exercise, writing prompt, or behavior change.
+  - "why": connect the action back to the framework. Explain the mechanism.
+
+Important: The coaching should teach the user something new. Introduce concepts they likely haven't heard of. The goal is to make them smarter and more self-aware with every journal entry.
 
 Journal entry:
 """
@@ -58,6 +71,22 @@ ${content}
         ) {
             console.error('Gemini response missing required fields:', analysis)
             return NextResponse.json({ error: 'Unexpected response structure from AI model' }, { status: 500 })
+        }
+
+        // Validate coaching object — provide fallback if model fails to generate it
+        if (
+            !analysis.coaching ||
+            typeof analysis.coaching.diagnosis !== 'string' ||
+            typeof analysis.coaching.framework !== 'string' ||
+            typeof analysis.coaching.action !== 'string' ||
+            typeof analysis.coaching.why !== 'string'
+        ) {
+            analysis.coaching = {
+                diagnosis: 'Unable to generate coaching for this entry.',
+                framework: 'Try writing a longer, more detailed entry for better analysis.',
+                action: 'Re-read what you wrote and add 2-3 more sentences about how you feel.',
+                why: 'More context helps the AI identify specific patterns and give targeted advice.'
+            }
         }
 
         // Clamp sentiment_score to [-1, 1] in case the model goes out of range
