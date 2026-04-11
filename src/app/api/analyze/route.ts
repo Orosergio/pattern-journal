@@ -20,11 +20,11 @@ The JSON must have this exact structure:
   "emotions": ["emotion1", "emotion2", "emotion3"],
   "themes": ["theme1", "theme2"],
   "sentiment_score": 0.0,
-  "reflection_prompt": "A thoughtful follow-up question",
+  "reflection_prompt": "A thoughtful follow-up question addressed directly to the person",
   "coaching": {
-    "diagnosis": "One sentence identifying the core pattern or challenge in this entry",
+    "diagnosis": "One sentence addressed directly to the person about the core pattern or challenge in this entry (use 'you'/'your', never 'the user')",
     "framework": "Name and briefly explain a real psychology, philosophy, or productivity concept that applies (e.g., Maslow's hierarchy, CBT cognitive distortions, Eisenhower matrix, Stoic dichotomy of control, habit loop theory, Kaizen, growth mindset, Parkinson's law, Pomodoro technique, journaling science, etc.)",
-    "action": "One specific, concrete action the user can take in the next 30 minutes",
+    "action": "One specific, concrete action someone could try — framed as a suggestion, not a command",
     "why": "One sentence explaining why this action works, grounded in the framework above"
   }
 }
@@ -33,14 +33,14 @@ Rules:
 - "emotions": array of 2-4 detected emotions (e.g., "joy", "anxiety", "gratitude", "frustration")
 - "themes": array of 1-3 recurring themes (e.g., "work stress", "personal growth", "relationships")
 - "sentiment_score": float from -1.0 (very negative) to 1.0 (very positive), 0.0 is neutral
-- "reflection_prompt": one thoughtful question that helps the user reflect deeper
+- "reflection_prompt": one thoughtful question that helps the person go deeper — addressed directly to them using "you"
 - "coaching": an object with exactly 4 keys: diagnosis, framework, action, why
-  - "diagnosis": identify what the user is actually struggling with, not surface-level
+  - "diagnosis": speak directly to the person about what they are actually sitting with, not surface-level. Use "you" and "your". Never write "the user".
   - "framework": reference a REAL concept from psychology, philosophy, neuroscience, or productivity research. Be specific — name the theory, the researcher, or the book. Do NOT make up frameworks.
-  - "action": must be doable RIGHT NOW in under 30 minutes. Not vague advice like "be more mindful" — give a specific exercise, writing prompt, or behavior change.
-  - "why": connect the action back to the framework. Explain the mechanism.
+  - "action": a concrete suggestion someone could try — specific enough to be actionable, framed gently (e.g., "You might try…", "One option is…"). Not a command.
+  - "why": connect the suggestion back to the framework. Explain the mechanism.
 
-Important: The coaching should teach the user something new. Introduce concepts they likely haven't heard of. The goal is to make them smarter and more self-aware with every journal entry.
+Important: The insights should feel like they come from someone who has genuinely read and understood this specific entry — not a generic template. Introduce real concepts the person may not have encountered. The goal is to leave them feeling understood, not prescribed to.
 
 Journal entry:
 """
