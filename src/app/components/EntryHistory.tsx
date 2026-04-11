@@ -374,7 +374,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
                         padding: "6px 14px", borderRadius: 100,
                         fontSize: 13, fontWeight: active ? 600 : 500,
                         background: active ? c.color : c.bg,
-                        color: active ? "#0a0a0b" : c.color,
+                        color: active ? "#fff" : c.color,
                         border: `1px solid ${active ? c.color : c.border}`,
                         cursor: "pointer",
                         transition: "all 0.18s",
@@ -436,7 +436,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
                         padding: "6px 14px", borderRadius: 100,
                         fontSize: 13, fontWeight: active ? 600 : 500,
                         background: active ? c.color : c.bg,
-                        color: active ? "#0a0a0b" : c.color,
+                        color: active ? "#fff" : c.color,
                         border: `1px solid ${active ? c.color : c.border}`,
                         cursor: "pointer",
                         transition: "all 0.18s",
@@ -478,7 +478,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
             padding: "10px 20px",
             borderTop: "1px solid var(--border)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            background: "rgba(255,255,255,0.015)",
+            background: "var(--bg-card-hover)",
           }}>
             <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
               Showing {filteredEntries.length} of {entries.length} entries
@@ -550,7 +550,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
             display: "flex", justifyContent: "space-between", alignItems: "center",
             padding: "14px 24px",
             borderBottom: "1px solid var(--border)",
-            background: "rgba(255,255,255,0.01)"
+            background: "var(--bg-card-hover)"
           }}>
             <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
               {format(new Date(entry.created_at), "MMMM d, yyyy · h:mm a")}
@@ -590,7 +590,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
                         onClick={() => handleTagClick(e, "emotion")}
                         style={{
                           padding: "3px 10px", borderRadius: 100, fontSize: 12, fontWeight: active ? 600 : 500,
-                          background: active ? c.color : c.bg, color: active ? "#0a0a0b" : c.color,
+                          background: active ? c.color : c.bg, color: active ? "#fff" : c.color,
                           border: `1px solid ${active ? c.color : c.border}`,
                           cursor: "pointer", fontFamily: "var(--sans)", transition: "all 0.15s",
                         }}
@@ -612,7 +612,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
                         onClick={() => handleTagClick(t, "topic")}
                         style={{
                           padding: "3px 10px", borderRadius: 100, fontSize: 12, fontWeight: active ? 600 : 500,
-                          background: active ? c.color : c.bg, color: active ? "#0a0a0b" : c.color,
+                          background: active ? c.color : c.bg, color: active ? "#fff" : c.color,
                           border: `1px solid ${active ? c.color : c.border}`,
                           cursor: "pointer", fontFamily: "var(--sans)", transition: "all 0.15s",
                         }}

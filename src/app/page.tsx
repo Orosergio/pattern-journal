@@ -44,7 +44,7 @@ export default function Home() {
         }}>
           <div style={{
             width: 40, height: 40, borderRadius: "50%",
-            border: "2px solid var(--border)", borderTopColor: "var(--accent)",
+            border: "2px solid rgba(0,0,0,0.08)", borderTopColor: "var(--accent)",
             animation: "spin 0.8s linear infinite"
           }} />
           <span style={{ color: "var(--text-dim)", fontSize: 14 }}>Loading...</span>
@@ -70,7 +70,7 @@ export default function Home() {
       {/* Header */}
       <header style={{
         position: "sticky", top: 0, zIndex: 50,
-        background: "rgba(10,10,11,0.85)", backdropFilter: "blur(20px)",
+        background: "rgba(246,243,238,0.9)", backdropFilter: "blur(20px)",
         borderBottom: "1px solid var(--border)",
         padding: "0 24px",
       }}>
@@ -113,7 +113,7 @@ export default function Home() {
         className="desktop-tab-nav"
         style={{
           position: "sticky", top: 60, zIndex: 40,
-          background: "rgba(10,10,11,0.85)", backdropFilter: "blur(20px)",
+          background: "rgba(246,243,238,0.9)", backdropFilter: "blur(20px)",
           borderBottom: "1px solid var(--border)",
           padding: "0 24px",
         }}
@@ -166,7 +166,7 @@ export default function Home() {
       {/* Mobile bottom nav */}
       <nav style={{
         position: "fixed", bottom: 0, left: 0, right: 0,
-        background: "rgba(10,10,11,0.97)", backdropFilter: "blur(20px)",
+        background: "rgba(246,243,238,0.97)", backdropFilter: "blur(20px)",
         borderTop: "1px solid var(--border)",
         display: "none",
         padding: "6px 8px env(safe-area-inset-bottom, 6px)",

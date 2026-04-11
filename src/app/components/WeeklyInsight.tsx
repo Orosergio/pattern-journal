@@ -323,7 +323,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
               fontWeight: 600,
               fontFamily: "var(--sans)",
               background: "var(--accent)",
-              color: "#0a0a0b",
+              color: "#fff",
               border: "none",
               cursor: "pointer",
               display: "flex",

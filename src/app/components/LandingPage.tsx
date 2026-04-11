@@ -15,32 +15,6 @@ export default function LandingPage() {
     return (
         <>
             <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-
-        :root {
-          --bg: #0a0a0b;
-          --bg-card: #111113;
-          --bg-card-hover: #161618;
-          --border: #1e1e22;
-          --border-light: #2a2a30;
-          --text: #e8e8ec;
-          --text-muted: #8b8b96;
-          --text-dim: #5c5c66;
-          --accent: #6ee7b7;
-          --accent-dim: rgba(110, 231, 183, 0.08);
-          --violet: #a78bfa;
-          --violet-dim: rgba(167, 139, 250, 0.1);
-          --rose: #fb7185;
-          --amber: #fbbf24;
-          --serif: 'DM Serif Display', Georgia, serif;
-          --sans: 'Instrument Sans', -apple-system, sans-serif;
-        }
-
-        body {
-          background: var(--bg) !important;
-          font-family: var(--sans) !important;
-        }
-
         .land-glow-orb {
           position: absolute;
           border-radius: 50%;
@@ -51,13 +25,13 @@ export default function LandingPage() {
         }
         .land-glow-1 {
           width: 600px; height: 600px;
-          background: radial-gradient(circle, rgba(110,231,183,0.07) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(124,154,130,0.08) 0%, transparent 70%);
           top: -200px; right: -100px;
           animation-delay: 0.3s;
         }
         .land-glow-2 {
           width: 500px; height: 500px;
-          background: radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(138,112,148,0.06) 0%, transparent 70%);
           bottom: 100px; left: -150px;
           animation-delay: 0.6s;
         }
@@ -90,7 +64,7 @@ export default function LandingPage() {
         .land-hero h1 br { display: inline; }
         .land-preview-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: 420px; }
         .land-preview-write { padding: 40px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 20px; }
-        .land-preview-analysis { padding: 40px; display: flex; flex-direction: column; gap: 24px; background: rgba(255,255,255,0.01); }
+        .land-preview-analysis { padding: 40px; display: flex; flex-direction: column; gap: 24px; background: var(--bg-card-hover); }
         .land-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .land-tech-bar { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; padding: 32px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .land-footer { display: flex; justify-content: space-between; align-items: center; }
@@ -135,11 +109,11 @@ export default function LandingPage() {
                     padding: "20px 40px",
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                     zIndex: 100,
-                    background: "rgba(10,10,11,0.8)",
+                    background: "rgba(246,243,238,0.85)",
                     backdropFilter: "blur(20px)",
                     borderBottom: "1px solid var(--border)"
                 }}>
-                    <div style={{ fontFamily: "var(--sans)", fontWeight: 700, fontSize: 18, letterSpacing: "-0.02em" }}>
+                    <div style={{ fontFamily: "var(--sans)", fontWeight: 700, fontSize: 18, letterSpacing: "-0.02em", color: "var(--text)" }}>
                         Pattern<span style={{ color: "var(--accent)" }}>Journal</span>
                     </div>
                     <div className="land-nav-links">
@@ -166,7 +140,7 @@ export default function LandingPage() {
                 }}>
                     <div style={{
                         display: "inline-flex", alignItems: "center", gap: 8,
-                        background: "var(--accent-dim)", border: "1px solid rgba(110,231,183,0.12)",
+                        background: "var(--accent-dim)", border: "1px solid rgba(124,154,130,0.15)",
                         padding: "6px 14px", borderRadius: 100,
                         fontSize: 13, fontWeight: 500, color: "var(--accent)",
                         marginBottom: 32, width: "fit-content",
@@ -179,10 +153,10 @@ export default function LandingPage() {
                     <h1 style={{
                         fontFamily: "var(--serif)", fontSize: "clamp(48px, 6.5vw, 84px)",
                         lineHeight: 1.05, letterSpacing: "-0.025em", fontWeight: 400,
-                        maxWidth: 800, opacity: 0,
+                        maxWidth: 800, opacity: 0, color: "var(--text)",
                         animation: "landSlideUp 0.8s ease forwards", animationDelay: "0.4s"
                     }}>
-                        Understand your<br />{" "}emotions through<br />{" "}<em style={{ fontStyle: "italic", color: "var(--accent)" }}>pattern recognition.</em>
+                        Understand your<br /> emotions through<br />{" "}<em style={{ fontStyle: "italic", color: "var(--accent)" }}>pattern recognition.</em>
                     </h1>
 
                     <p style={{
@@ -199,7 +173,7 @@ export default function LandingPage() {
                     }}>
                         <button onClick={handleLogin} style={{
                             display: "inline-flex", alignItems: "center", gap: 10,
-                            background: "var(--accent)", color: "#0a0a0b",
+                            background: "var(--accent)", color: "#fff",
                             padding: "14px 28px", borderRadius: 12,
                             fontSize: 15, fontWeight: 600, border: "none", cursor: "pointer",
                             fontFamily: "var(--sans)", transition: "all 0.25s ease"
@@ -225,13 +199,13 @@ export default function LandingPage() {
                     <div style={{
                         background: "var(--bg-card)", border: "1px solid var(--border)",
                         borderRadius: 16, overflow: "hidden",
-                        boxShadow: "0 4px 6px rgba(0,0,0,0.1), 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)"
+                        boxShadow: "0 4px 6px rgba(0,0,0,0.03), 0 20px 60px rgba(0,0,0,0.06)"
                     }}>
                         {/* Top bar */}
                         <div style={{
                             display: "flex", alignItems: "center", gap: 8,
                             padding: "14px 20px", borderBottom: "1px solid var(--border)",
-                            background: "rgba(255,255,255,0.01)"
+                            background: "var(--bg-card-hover)"
                         }}>
                             <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
                             <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
@@ -247,7 +221,7 @@ export default function LandingPage() {
                                 <div style={{ fontFamily: "var(--serif)", fontSize: 22, color: "var(--text)" }}>How are you feeling today?</div>
                                 <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Write freely. AI will detect patterns in your emotions.</div>
                                 <div style={{
-                                    flex: 1, background: "rgba(255,255,255,0.02)",
+                                    flex: 1, background: "var(--bg-input)",
                                     border: "1px solid var(--border)", borderRadius: 10, padding: 16
                                 }}>
                                     <div style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-muted)" }}>
@@ -256,7 +230,7 @@ export default function LandingPage() {
                                     </div>
                                 </div>
                                 <div style={{
-                                    alignSelf: "flex-end", background: "var(--accent)", color: "#0a0a0b",
+                                    alignSelf: "flex-end", background: "var(--accent)", color: "#fff",
                                     border: "none", padding: "10px 20px", borderRadius: 8,
                                     fontSize: 13, fontWeight: 600, fontFamily: "var(--sans)"
                                 }}>Analyze & Save</div>
@@ -267,10 +241,10 @@ export default function LandingPage() {
                                     <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-dim)", fontWeight: 600 }}>Emotions Detected</div>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
                                         {[
-                                            { label: "introspection", cls: "var(--accent-dim)", color: "var(--accent)", border: "rgba(110,231,183,0.15)", delay: "1.8s" },
-                                            { label: "doubt", cls: "var(--violet-dim)", color: "var(--violet)", border: "rgba(167,139,250,0.15)", delay: "2.0s" },
-                                            { label: "tension", cls: "rgba(251,113,133,0.08)", color: "var(--rose)", border: "rgba(251,113,133,0.15)", delay: "2.2s" },
-                                            { label: "relief", cls: "rgba(251,191,36,0.08)", color: "var(--amber)", border: "rgba(251,191,36,0.15)", delay: "2.4s" },
+                                            { label: "introspection", cls: "var(--accent-dim)", color: "var(--accent)", border: "rgba(124,154,130,0.2)", delay: "1.8s" },
+                                            { label: "doubt", cls: "var(--violet-dim)", color: "var(--violet)", border: "rgba(138,112,148,0.2)", delay: "2.0s" },
+                                            { label: "tension", cls: "var(--rose-dim)", color: "var(--rose)", border: "rgba(196,125,90,0.2)", delay: "2.2s" },
+                                            { label: "relief", cls: "var(--amber-dim)", color: "var(--amber)", border: "rgba(184,146,58,0.2)", delay: "2.4s" },
                                         ].map(t => (
                                             <span key={t.label} style={{
                                                 padding: "6px 14px", borderRadius: 100, fontSize: 13, fontWeight: 500,
@@ -283,8 +257,8 @@ export default function LandingPage() {
                                 <div>
                                     <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-dim)", fontWeight: 600 }}>Themes</div>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-                                        <span style={{ padding: "6px 14px", borderRadius: 100, fontSize: 13, fontWeight: 500, background: "var(--violet-dim)", color: "var(--violet)", border: "1px solid rgba(167,139,250,0.15)", opacity: 0, animation: "landPopIn 0.4s ease forwards", animationDelay: "2.4s" }}>family dynamics</span>
-                                        <span style={{ padding: "6px 14px", borderRadius: 100, fontSize: 13, fontWeight: 500, background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid rgba(110,231,183,0.15)", opacity: 0, animation: "landPopIn 0.4s ease forwards", animationDelay: "2.6s" }}>self-validation</span>
+                                        <span style={{ padding: "6px 14px", borderRadius: 100, fontSize: 13, fontWeight: 500, background: "var(--violet-dim)", color: "var(--violet)", border: "1px solid rgba(138,112,148,0.2)", opacity: 0, animation: "landPopIn 0.4s ease forwards", animationDelay: "2.4s" }}>family dynamics</span>
+                                        <span style={{ padding: "6px 14px", borderRadius: 100, fontSize: 13, fontWeight: 500, background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid rgba(124,154,130,0.2)", opacity: 0, animation: "landPopIn 0.4s ease forwards", animationDelay: "2.6s" }}>self-validation</span>
                                     </div>
                                 </div>
                                 <div>
@@ -297,7 +271,7 @@ export default function LandingPage() {
                                     </div>
                                 </div>
                                 <div style={{
-                                    background: "rgba(255,255,255,0.02)", border: "1px solid var(--border)",
+                                    background: "var(--bg-input)", border: "1px solid var(--border)",
                                     borderRadius: 10, padding: 16, fontSize: 14, fontStyle: "italic",
                                     color: "var(--text-muted)", lineHeight: 1.6,
                                     opacity: 0, animation: "landFadeIn 0.6s ease forwards", animationDelay: "2.8s"
@@ -312,21 +286,22 @@ export default function LandingPage() {
                 {/* Features */}
                 <section id="features" className="land-section-pad" style={{ maxWidth: 1200, margin: "0 auto", paddingBottom: 120 }}>
                     <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-dim)", fontWeight: 600, marginBottom: 16 }}>What it does</div>
-                    <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 60, maxWidth: 600, lineHeight: 1.15 }}>
+                    <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 60, maxWidth: 600, lineHeight: 1.15, color: "var(--text)" }}>
                         More than a journal — a mirror for your mind.
                     </h2>
                     <div className="land-features-grid">
                         {[
                             { icon: "🧠", bg: "var(--accent-dim)", title: "Emotion Detection", desc: "Every entry is analyzed by AI to identify 2-4 emotions, recurring themes, and overall sentiment — instantly." },
                             { icon: "📈", bg: "var(--violet-dim)", title: "Pattern Dashboard", desc: "Sentiment trends over time, most frequent emotions, and recurring life themes visualized in one view." },
-                            { icon: "💡", bg: "rgba(251,113,133,0.08)", title: "Reflection Prompts", desc: "AI generates a personalized follow-up question after each entry to deepen self-awareness." },
+                            { icon: "💡", bg: "var(--rose-dim)", title: "Reflection Prompts", desc: "AI generates a personalized follow-up question after each entry to deepen self-awareness." },
                         ].map(f => (
                             <div key={f.title} style={{
                                 background: "var(--bg-card)", border: "1px solid var(--border)",
-                                borderRadius: 14, padding: 32, transition: "all 0.3s ease", cursor: "default"
+                                borderRadius: 14, padding: 32, transition: "all 0.3s ease", cursor: "default",
+                                boxShadow: "var(--card-shadow)",
                             }}>
                                 <div style={{ width: 44, height: 44, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, fontSize: 20, background: f.bg }}>{f.icon}</div>
-                                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 10, letterSpacing: "-0.01em" }}>{f.title}</h3>
+                                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 10, letterSpacing: "-0.01em", color: "var(--text)" }}>{f.title}</h3>
                                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{f.desc}</p>
                             </div>
                         ))}
@@ -339,7 +314,7 @@ export default function LandingPage() {
                         {["Next.js", "React", "TypeScript", "Supabase", "Google AI", "Vercel", "Recharts"].map((tech, i) => (
                             <span key={tech} style={{ display: "flex", alignItems: "center", gap: 40 }}>
                                 <span style={{ fontSize: 14, color: "var(--text-dim)", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase" }}>{tech}</span>
-                                {i < 6 && <span className="land-tech-dot" style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--border-light)" }} />}
+                                {i < 6 && <span className="land-tech-dot" style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--border)" }} />}
                             </span>
                         ))}
                     </div>
@@ -347,7 +322,7 @@ export default function LandingPage() {
 
                 {/* CTA */}
                 <section className="land-section-pad" style={{ textAlign: "center", paddingTop: 80, paddingBottom: 120, maxWidth: 600, margin: "0 auto" }}>
-                    <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(28px, 3.5vw, 40px)", marginBottom: 16, lineHeight: 1.2 }}>
+                    <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(28px, 3.5vw, 40px)", marginBottom: 16, lineHeight: 1.2, color: "var(--text)" }}>
                         Start understanding yourself better.
                     </h2>
                     <p style={{ color: "var(--text-muted)", fontSize: 16, marginBottom: 32, lineHeight: 1.6 }}>
@@ -355,7 +330,7 @@ export default function LandingPage() {
                     </p>
                     <button onClick={handleLogin} style={{
                         display: "inline-flex", alignItems: "center", gap: 10,
-                        background: "var(--accent)", color: "#0a0a0b",
+                        background: "var(--accent)", color: "#fff",
                         padding: "14px 28px", borderRadius: 12,
                         fontSize: 15, fontWeight: 600, border: "none", cursor: "pointer",
                         fontFamily: "var(--sans)", margin: "0 auto"

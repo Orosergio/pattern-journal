@@ -58,16 +58,19 @@ function getPromptFromSentiment(avgSentiment: number | null, entryCount: number)
 }
 
 // ─── Voice Recognition Hook ────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function useVoiceRecognition(onTranscript: (text: string) => void) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const [voiceError, setVoiceError] = useState("");
-  const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
 
   function createRecognition() {
-    const SpeechRecognition =
-      (window as unknown as { SpeechRecognition?: typeof window.SpeechRecognition }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof window.SpeechRecognition }).webkitSpeechRecognition;
+    // Web Speech API doesn't have TS types — access via any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any;
+    const SpeechRecognition = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (!SpeechRecognition) return null;
     const rec = new SpeechRecognition();
     rec.continuous = true;
@@ -84,7 +87,8 @@ function useVoiceRecognition(onTranscript: (text: string) => void) {
     }
     recognitionRef.current = rec;
 
-    rec.onresult = (event: SpeechRecognitionEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rec.onresult = (event: any) => {
       let final = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -94,7 +98,8 @@ function useVoiceRecognition(onTranscript: (text: string) => void) {
       if (final) onTranscript(final);
     };
 
-    rec.onerror = (event: SpeechRecognitionErrorEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rec.onerror = (event: any) => {
       if (event.error === "not-allowed") {
         setVoiceError("Microphone access denied. Please allow it in your browser settings.");
       } else if (event.error !== "aborted") {
@@ -233,9 +238,9 @@ function ContextIconButton({ icon, label, active, activeColor, activeBg, childre
         <div style={{
           position: "absolute", top: "calc(100% + 6px)", left: "50%",
           transform: "translateX(-50%)",
-          background: "#1a1a1e", border: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--bg-elevated)", border: "1px solid var(--border)",
           borderRadius: 12, padding: 6,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
           zIndex: 100,
           minWidth: 120,
           animation: "popIn 0.15s ease",
@@ -517,15 +522,16 @@ export default function JournalEntry({ userId }: { userId: string }) {
 
       {/* ── Context Icon Bar + Textarea ── */}
       <div style={{
-        background: "rgba(255,255,255,0.015)",
+        background: "var(--bg-card)",
         borderRadius: 16,
         overflow: "visible",
+        boxShadow: "var(--card-shadow)",
       }}>
         {/* Compact icon bar */}
         <div style={{
           display: "flex", alignItems: "center", gap: 2,
           padding: "6px 8px",
-          borderBottom: "1px solid rgba(255,255,255,0.04)",
+          borderBottom: "1px solid var(--border)",
         }}>
           {/* Activity */}
           <ContextIconButton
@@ -646,14 +652,14 @@ export default function JournalEntry({ userId }: { userId: string }) {
           </ContextIconButton>
 
           {/* Divider */}
-          <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.06)", margin: "0 4px" }} />
+          <div style={{ width: 1, height: 20, background: "var(--border)", margin: "0 4px" }} />
 
           {/* Context summary */}
           {contextCount > 0 ? (
             <span style={{
               fontSize: 11, color: "var(--text-dim)",
               padding: "3px 8px", borderRadius: 6,
-              background: "rgba(255,255,255,0.03)",
+              background: "var(--bg-card-hover)",
             }}>
               {contextCount} logged
             </span>
@@ -782,7 +788,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
               ? "var(--accent)"
               : analyzing || content.trim().length < 20
                 ? "var(--text-dim)"
-                : "#0a0a0b",
+                : "var(--bg)",
             border: saved ? "1px solid rgba(110,231,183,0.2)" : "none",
             cursor: analyzing || saved || content.trim().length < 20 ? "not-allowed" : "pointer",
             transition: "all 0.25s",
@@ -792,7 +798,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
           {analyzing && (
             <div style={{
               width: 14, height: 14, borderRadius: "50%",
-              border: "2px solid rgba(0,0,0,0.2)", borderTopColor: "#0a0a0b",
+              border: "2px solid rgba(0,0,0,0.2)", borderTopColor: "var(--bg)",
               animation: "spin 0.6s linear infinite"
             }} />
           )}
@@ -1073,7 +1079,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
             style={{
               padding: "10px 20px", borderRadius: 10,
               fontSize: 13, fontWeight: 600, fontFamily: "var(--sans)",
-              background: "var(--accent)", color: "#0a0a0b",
+              background: "var(--accent)", color: "#fff",
               border: "none", cursor: "pointer",
               whiteSpace: "nowrap",
             }}
