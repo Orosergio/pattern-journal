@@ -291,16 +291,16 @@ export default function LandingPage() {
                     </h2>
                     <div className="land-features-grid">
                         {[
-                            { icon: "🧠", bg: "var(--accent-dim)", title: "Emotion Detection", desc: "Every entry is analyzed by AI to identify 2-4 emotions, recurring themes, and overall sentiment — instantly." },
-                            { icon: "📈", bg: "var(--violet-dim)", title: "Pattern Dashboard", desc: "Sentiment trends over time, most frequent emotions, and recurring life themes visualized in one view." },
-                            { icon: "💡", bg: "var(--rose-dim)", title: "Reflection Prompts", desc: "AI generates a personalized follow-up question after each entry to deepen self-awareness." },
+                            { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" /><circle cx="12" cy="9" r="2.5" /></svg>, bg: "var(--accent-dim)", title: "Emotion Detection", desc: "Every entry is analyzed by AI to identify 2-4 emotions, recurring themes, and overall sentiment — instantly." },
+                            { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>, bg: "var(--violet-dim)", title: "Pattern Dashboard", desc: "Sentiment trends over time, most frequent emotions, and recurring life themes visualized in one view." },
+                            { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>, bg: "var(--rose-dim)", title: "Reflection Prompts", desc: "AI generates a personalized follow-up question after each entry to deepen self-awareness." },
                         ].map(f => (
                             <div key={f.title} style={{
                                 background: "var(--bg-card)", border: "1px solid var(--border)",
                                 borderRadius: 14, padding: 32, transition: "all 0.3s ease", cursor: "default",
                                 boxShadow: "var(--card-shadow)",
                             }}>
-                                <div style={{ width: 44, height: 44, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, fontSize: 20, background: f.bg }}>{f.icon}</div>
+                                <div style={{ width: 44, height: 44, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, background: f.bg, color: "var(--text-muted)" }}>{f.icon}</div>
                                 <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 10, letterSpacing: "-0.01em", color: "var(--text)" }}>{f.title}</h3>
                                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{f.desc}</p>
                             </div>

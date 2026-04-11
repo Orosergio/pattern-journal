@@ -486,19 +486,19 @@ export default function JournalEntry({ userId }: { userId: string }) {
   };
 
   const tagColors = [
-    { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(110,231,183,0.15)" },
-    { bg: "var(--violet-dim)", color: "var(--violet)", border: "rgba(167,139,250,0.15)" },
-    { bg: "var(--rose-dim)", color: "var(--rose)", border: "rgba(251,113,133,0.15)" },
-    { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(251,191,36,0.15)" },
+    { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(124,154,130,0.15)" },
+    { bg: "var(--violet-dim)", color: "var(--violet)", border: "rgba(138,112,148,0.15)" },
+    { bg: "var(--rose-dim)", color: "var(--rose)", border: "rgba(196,125,90,0.15)" },
+    { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(184,146,58,0.15)" },
   ];
 
   // ─── Color configs for each context category ─────────────
   const ctxColors = {
-    activity: { color: "#6ee7b7", bg: "rgba(110,231,183,0.1)" },
-    sleep: { color: "#a78bfa", bg: "rgba(167,139,250,0.1)" },
-    weather: { color: "#fbbf24", bg: "rgba(251,191,36,0.1)" },
+    activity: { color: "#7c9a82", bg: "rgba(124,154,130,0.1)" },
+    sleep: { color: "#a78bfa", bg: "rgba(138,112,148,0.1)" },
+    weather: { color: "#fbbf24", bg: "rgba(184,146,58,0.1)" },
     caffeine: { color: "#fb923c", bg: "rgba(251,146,60,0.1)" },
-    screen: { color: "#fb7185", bg: "rgba(251,113,133,0.1)" },
+    screen: { color: "#fb7185", bg: "rgba(196,125,90,0.1)" },
   };
 
   return (
@@ -530,7 +530,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
                 fontSize: 12, fontWeight: active ? 600 : 400,
                 background: active ? "var(--accent-dim)" : "transparent",
                 color: active ? "var(--accent)" : "var(--text-dim)",
-                border: active ? "1px solid rgba(110,231,183,0.2)" : "1px solid var(--border)",
+                border: active ? "1px solid rgba(124,154,130,0.2)" : "1px solid var(--border)",
                 cursor: "pointer", fontFamily: "var(--sans)",
                 transition: "all 0.15s",
               }}
@@ -720,7 +720,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
                 style={{
                   width: 38, height: 38, borderRadius: 10,
                   border: "none",
-                  background: voice.isListening ? "rgba(251,113,133,0.15)" : "transparent",
+                  background: voice.isListening ? "rgba(196,125,90,0.15)" : "transparent",
                   color: voice.isListening ? "var(--rose)" : "var(--text-dim)",
                   cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
@@ -779,7 +779,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
       {/* Voice error */}
       {voice.voiceError && (
         <div style={{
-          background: "var(--rose-dim)", border: "1px solid rgba(251,113,133,0.15)",
+          background: "var(--rose-dim)", border: "1px solid rgba(196,125,90,0.15)",
           borderRadius: 10, padding: "10px 14px",
           fontSize: 12, color: "var(--rose)", lineHeight: 1.5,
           marginTop: -12,
@@ -816,8 +816,8 @@ export default function JournalEntry({ userId }: { userId: string }) {
               ? "var(--accent)"
               : analyzing || content.trim().length < 20
                 ? "var(--text-dim)"
-                : "var(--bg)",
-            border: saved ? "1px solid rgba(110,231,183,0.2)" : "none",
+                : "#fff",
+            border: saved ? "1px solid rgba(124,154,130,0.2)" : "none",
             cursor: analyzing || saved || content.trim().length < 20 ? "not-allowed" : "pointer",
             transition: "all 0.25s",
             display: "flex", alignItems: "center", gap: 8,
@@ -837,7 +837,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
       {/* Error */}
       {error && (
         <div style={{
-          background: "var(--rose-dim)", border: "1px solid rgba(251,113,133,0.15)",
+          background: "var(--rose-dim)", border: "1px solid rgba(196,125,90,0.15)",
           borderRadius: 10, padding: "12px 16px",
           fontSize: 13, color: "var(--rose)", lineHeight: 1.5,
           animation: "slideDown 0.3s ease"
@@ -856,7 +856,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
           {/* Success banner */}
           {saved && (
             <div style={{
-              background: "var(--accent-dim)", borderBottom: "1px solid rgba(110,231,183,0.1)",
+              background: "var(--accent-dim)", borderBottom: "1px solid rgba(124,154,130,0.1)",
               padding: "10px 24px", fontSize: 13, color: "var(--accent)",
               fontWeight: 500, display: "flex", alignItems: "center", gap: 8
             }}>
@@ -907,7 +907,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
                     padding: "6px 14px", borderRadius: 100,
                     fontSize: 13, fontWeight: 500,
                     background: "var(--violet-dim)", color: "var(--violet)",
-                    border: "1px solid rgba(167,139,250,0.15)",
+                    border: "1px solid rgba(138,112,148,0.15)",
                   }}>
                     {theme}
                   </span>
@@ -975,7 +975,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
             {/* Insights — hidden in express mode */}
             {analysis.coaching && mode !== "express" && (
               <div style={{
-                background: "linear-gradient(135deg, rgba(110,231,183,0.03) 0%, rgba(167,139,250,0.03) 100%)",
+                background: "linear-gradient(135deg, rgba(124,154,130,0.03) 0%, rgba(138,112,148,0.03) 100%)",
                 border: "1px solid var(--border)",
                 borderRadius: 14,
                 overflow: "hidden",
@@ -986,7 +986,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
                   padding: "14px 20px",
                   borderBottom: "1px solid var(--border)",
                   display: "flex", alignItems: "center", gap: 10,
-                  background: "rgba(110,231,183,0.04)"
+                  background: "rgba(124,154,130,0.04)"
                 }}>
                   <span style={{ fontSize: 18 }}>🔍</span>
                   <span style={{
@@ -1016,7 +1016,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
                   {/* Framework */}
                   <div style={{
                     background: "var(--accent-dim)",
-                    border: "1px solid rgba(110,231,183,0.12)",
+                    border: "1px solid rgba(124,154,130,0.12)",
                     borderRadius: 10, padding: "14px 16px"
                   }}>
                     <div style={{

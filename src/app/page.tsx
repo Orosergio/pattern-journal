@@ -58,11 +58,18 @@ export default function Home() {
     return <LandingPage />;
   }
 
+  const tabIcons = {
+    write: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /></svg>,
+    dashboard: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>,
+    history: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+    insights: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m16 12-4-4-4 4" /><path d="M12 16V8" /></svg>,
+  };
+
   const tabs = [
-    { key: "write" as const, label: "Write", icon: "✏️" },
-    { key: "dashboard" as const, label: "Dashboard", icon: "📊" },
-    { key: "history" as const, label: "History", icon: "📖" },
-    { key: "insights" as const, label: "Insights", icon: "✨" },
+    { key: "write" as const, label: "Write", icon: tabIcons.write },
+    { key: "dashboard" as const, label: "Dashboard", icon: tabIcons.dashboard },
+    { key: "history" as const, label: "History", icon: tabIcons.history },
+    { key: "insights" as const, label: "Insights", icon: tabIcons.insights },
   ];
 
   return (

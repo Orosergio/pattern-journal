@@ -29,27 +29,39 @@ interface WeeklyInsightData {
   recommendations: Recommendation[];
 }
 
+const TrendIcons = {
+  improving: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>,
+  declining: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7" /><polyline points="16 17 22 17 22 11" /></svg>,
+  stable: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>,
+};
+
+const InsightIcons = {
+  sparkle: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" /></svg>,
+  check: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>,
+  alert: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+};
+
 const trendConfig = {
   improving: {
     label: "Improving",
-    icon: "📈",
+    icon: TrendIcons.improving,
     color: "var(--accent)",
     bg: "var(--accent-dim)",
-    border: "rgba(110,231,183,0.2)",
+    border: "rgba(124,154,130,0.2)",
   },
   declining: {
     label: "Declining",
-    icon: "📉",
+    icon: TrendIcons.declining,
     color: "var(--rose)",
     bg: "var(--rose-dim)",
-    border: "rgba(251,113,133,0.2)",
+    border: "rgba(196,125,90,0.2)",
   },
   stable: {
     label: "Stable",
-    icon: "〰️",
+    icon: TrendIcons.stable,
     color: "var(--amber)",
     bg: "var(--amber-dim)",
-    border: "rgba(251,191,36,0.2)",
+    border: "rgba(184,146,58,0.2)",
   },
 };
 
@@ -124,10 +136,10 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
   };
 
   const tagColors = [
-    { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(110,231,183,0.15)" },
-    { bg: "var(--violet-dim)", color: "var(--violet)", border: "rgba(167,139,250,0.15)" },
-    { bg: "var(--rose-dim)", color: "var(--rose)", border: "rgba(251,113,133,0.15)" },
-    { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(251,191,36,0.15)" },
+    { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(124,154,130,0.15)" },
+    { bg: "var(--violet-dim)", color: "var(--violet)", border: "rgba(138,112,148,0.15)" },
+    { bg: "var(--rose-dim)", color: "var(--rose)", border: "rgba(196,125,90,0.15)" },
+    { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(184,146,58,0.15)" },
   ];
 
   // Loading state (fetching entries)
@@ -174,7 +186,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
             borderRadius: 20,
           }}
         >
-          <div style={{ fontSize: 52, marginBottom: 20 }}>✨</div>
+          <div style={{ color: "var(--text-dim)", marginBottom: 20 }}>{InsightIcons.sparkle}</div>
           <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, fontWeight: 400, marginBottom: 10 }}>
             Keep writing to unlock insights
           </h3>
@@ -190,7 +202,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
               padding: "10px 20px",
               borderRadius: 100,
               background: "var(--accent-dim)",
-              border: "1px solid rgba(110,231,183,0.15)",
+              border: "1px solid rgba(138,112,148,0.2)",
               fontSize: 13,
               color: "var(--accent)",
               fontWeight: 500,
@@ -243,7 +255,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
                 animation: "spin 1.2s linear infinite",
               }}
             />
-            <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", fontSize: 24 }}>✨</span>
+            <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: "var(--accent)" }}>{InsightIcons.sparkle}</span>
           </div>
 
           <div>
@@ -306,7 +318,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
             <span style={{
               padding: "2px 10px", borderRadius: 100, fontSize: 12, fontWeight: 500,
               background: "var(--accent-dim)", color: "var(--accent)",
-              border: "1px solid rgba(110,231,183,0.15)"
+              border: "1px solid rgba(124,154,130,0.15)"
             }}>
               {entries.length} {entries.length === 1 ? "entry" : "entries"}
             </span>
@@ -332,7 +344,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
               transition: "all 0.2s",
             }}
           >
-            <span>✨</span>
+            <span style={{ display: "flex", alignItems: "center" }}>{InsightIcons.sparkle}</span>
             {insight ? "Regenerate" : "Generate Insight"}
           </button>
           {lastGenerated && (
@@ -360,7 +372,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
           borderRadius: 20, padding: "60px 40px",
           textAlign: "center",
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✨</div>
+          <div style={{ color: "var(--text-dim)", marginBottom: 16 }}>{InsightIcons.sparkle}</div>
           <h3 style={{ fontFamily: "var(--serif)", fontSize: 22, fontWeight: 400, marginBottom: 10 }}>
             Ready to reflect?
           </h3>
@@ -458,7 +470,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
                     fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em",
                     color: "var(--accent)", fontWeight: 600,
                     display: "flex", alignItems: "center", gap: 6,
-                  }}>✅ Strengths</div>
+                  }}><span style={{ display: "inline-flex", alignItems: "center", marginRight: 4 }}>{InsightIcons.check}</span> Strengths</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {insight.habits.good.map((h, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -483,7 +495,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
                     fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em",
                     color: "var(--amber)", fontWeight: 600,
                     display: "flex", alignItems: "center", gap: 6,
-                  }}>⚠️ Watch Out</div>
+                  }}><span style={{ display: "inline-flex", alignItems: "center", marginRight: 4 }}>{InsightIcons.alert}</span> Watch Out</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {insight.habits.concerning.map((h, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>

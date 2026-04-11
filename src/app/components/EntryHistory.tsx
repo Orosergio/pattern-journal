@@ -17,15 +17,15 @@ interface Entry {
 const VISIBLE_TAG_LIMIT = 6;
 
 const emotionColors = [
-  { bg: "var(--rose-dim)", color: "var(--rose)", border: "rgba(251,113,133,0.15)" },
-  { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(251,191,36,0.15)" },
+  { bg: "var(--rose-dim)", color: "var(--rose)", border: "rgba(196,125,90,0.15)" },
+  { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(184,146,58,0.15)" },
   { bg: "rgba(251,146,60,0.08)", color: "#fb923c", border: "rgba(251,146,60,0.15)" },
   { bg: "rgba(56,189,248,0.08)", color: "#38bdf8", border: "rgba(56,189,248,0.15)" },
 ];
 
 const topicColors = [
-  { bg: "var(--violet-dim)", color: "var(--violet)", border: "rgba(167,139,250,0.15)" },
-  { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(110,231,183,0.15)" },
+  { bg: "var(--violet-dim)", color: "var(--violet)", border: "rgba(138,112,148,0.15)" },
+  { bg: "var(--accent-dim)", color: "var(--accent)", border: "rgba(124,154,130,0.15)" },
   { bg: "rgba(96,165,250,0.08)", color: "#60a5fa", border: "rgba(96,165,250,0.15)" },
   { bg: "rgba(192,132,252,0.08)", color: "#c084fc", border: "rgba(192,132,252,0.15)" },
 ];
@@ -150,7 +150,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
   if (error) {
     return (
       <div style={{
-        background: "var(--rose-dim)", border: "1px solid rgba(251,113,133,0.15)",
+        background: "var(--rose-dim)", border: "1px solid rgba(196,125,90,0.15)",
         borderRadius: 12, padding: 16, fontSize: 13, color: "var(--rose)"
       }}>{error}</div>
     );
@@ -522,7 +522,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
             onClick={() => { setSelectedTag(null); setSearchQuery(""); }}
             style={{
               marginTop: 12, fontSize: 13, color: "var(--accent)",
-              background: "var(--accent-dim)", border: "1px solid rgba(110,231,183,0.15)",
+              background: "var(--accent-dim)", border: "1px solid rgba(124,154,130,0.15)",
               padding: "8px 20px", borderRadius: 8,
               cursor: "pointer", fontFamily: "var(--sans)", fontWeight: 500,
             }}
