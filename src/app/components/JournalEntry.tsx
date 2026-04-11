@@ -58,23 +58,25 @@ function getPromptFromSentiment(avgSentiment: number | null, entryCount: number)
 }
 
 // ─── Voice Recognition Hook ────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function useVoiceRecognition(onTranscript: (text: string) => void) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const [voiceError, setVoiceError] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+  // Source of truth: does the user WANT to be listening? (survives auto-restarts)
+  const wantListening = useRef(false);
+  // Tracks highest result index we've already appended
+  const processedUpTo = useRef(-1);
 
   function createRecognition() {
-    // Web Speech API doesn't have TS types — access via any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
     const SpeechRecognition = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (!SpeechRecognition) return null;
     const rec = new SpeechRecognition();
     rec.continuous = true;
-    rec.interimResults = true;
+    rec.interimResults = false;
     rec.lang = "en-US";
     return rec;
   }
@@ -90,9 +92,11 @@ function useVoiceRecognition(onTranscript: (text: string) => void) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rec.onresult = (event: any) => {
       let final = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
+      for (let i = 0; i < event.results.length; i++) {
+        if (i <= processedUpTo.current) continue;
         if (event.results[i].isFinal) {
           final += event.results[i][0].transcript;
+          processedUpTo.current = i;
         }
       }
       if (final) onTranscript(final);
@@ -100,19 +104,39 @@ function useVoiceRecognition(onTranscript: (text: string) => void) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rec.onerror = (event: any) => {
-      if (event.error === "not-allowed") {
-        setVoiceError("Microphone access denied. Please allow it in your browser settings.");
-      } else if (event.error !== "aborted") {
+      const err = event.error;
+      if (err === "not-allowed") {
+        wantListening.current = false;
+        setVoiceError("Microphone access denied. Allow it in browser settings.");
+        setIsListening(false);
+      } else if (err === "no-speech") {
+        // Desktop Chrome fires this after ~5s silence — don't error,
+        // onend will auto-restart the session.
+      } else if (err !== "aborted") {
+        wantListening.current = false;
         setVoiceError("Voice recognition error. Try again.");
+        setIsListening(false);
       }
-      setIsListening(false);
     };
 
     rec.onend = () => {
-      setIsListening(false);
+      // Desktop Chrome kills sessions after silence / no-speech.
+      // Auto-restart if the user hasn't explicitly stopped.
+      if (wantListening.current) {
+        try {
+          processedUpTo.current = -1;
+          rec.start();
+        } catch {
+          wantListening.current = false;
+          setIsListening(false);
+        }
+      } else {
+        setIsListening(false);
+      }
     };
 
     return () => {
+      wantListening.current = false;
       rec.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -123,18 +147,22 @@ function useVoiceRecognition(onTranscript: (text: string) => void) {
     if (!rec) return;
     setVoiceError("");
 
-    if (isListening) {
+    if (wantListening.current) {
+      wantListening.current = false;
       rec.stop();
       setIsListening(false);
     } else {
       try {
+        processedUpTo.current = -1;
+        wantListening.current = true;
         rec.start();
         setIsListening(true);
       } catch {
+        wantListening.current = false;
         setVoiceError("Could not start voice recognition.");
       }
     }
-  }, [isListening]);
+  }, []);
 
   return { isListening, isSupported, voiceError, toggle };
 }
