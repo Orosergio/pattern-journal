@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
+import type { DateRange } from "@/app/page";
 
 interface Entry {
   id: string;
@@ -30,7 +31,9 @@ const topicColors = [
   { bg: "rgba(192,132,252,0.08)", color: "#c084fc", border: "rgba(192,132,252,0.15)" },
 ];
 
-export default function EntryHistory({ userId }: { userId: string }) {
+const PAGE_SIZE = 10;
+
+export default function EntryHistory({ userId, dateRange }: { userId: string; dateRange: DateRange }) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,15 +41,24 @@ export default function EntryHistory({ userId }: { userId: string }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAllEmotions, setShowAllEmotions] = useState(false);
   const [showAllTopics, setShowAllTopics] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
+    setLoading(true);
+    setError("");
+    // Reset view state when range changes
+    setSelectedTag(null);
+    setSearchQuery("");
+    setVisibleCount(PAGE_SIZE);
     const fetchEntries = async () => {
       const { data, error: dbError } = await supabase
         .from("entries")
         .select("*")
         .eq("user_id", userId)
+        .gte("created_at", dateRange.start.toISOString())
+        .lte("created_at", dateRange.end.toISOString())
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(500);
 
       if (dbError) {
         setError("Failed to load entries.");
@@ -56,7 +68,7 @@ export default function EntryHistory({ userId }: { userId: string }) {
       setLoading(false);
     };
     fetchEntries();
-  }, [userId]);
+  }, [userId, dateRange]);
 
   // Theme frequency
   const themeCounts = useMemo(() => {
@@ -532,8 +544,8 @@ export default function EntryHistory({ userId }: { userId: string }) {
         </div>
       )}
 
-      {/* Entry list */}
-      {filteredEntries.map((entry, index) => (
+      {/* Entry list — paginated */}
+      {filteredEntries.slice(0, visibleCount).map((entry, index) => (
         <div
           key={entry.id}
           style={{
@@ -637,6 +649,37 @@ export default function EntryHistory({ userId }: { userId: string }) {
           </div>
         </div>
       ))}
+
+      {/* Load More */}
+      {filteredEntries.length > visibleCount && (
+        <button
+          onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+          style={{
+            width: "100%", padding: "12px",
+            background: "var(--bg-card)", border: "1px solid var(--border)",
+            borderRadius: 12, fontSize: 13, fontWeight: 500,
+            color: "var(--text-dim)", cursor: "pointer",
+            fontFamily: "var(--sans)", transition: "all 0.18s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "var(--accent)";
+            e.currentTarget.style.color = "var(--accent)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "var(--border)";
+            e.currentTarget.style.color = "var(--text-dim)";
+          }}
+        >
+          Load more · {filteredEntries.length - visibleCount} remaining
+        </button>
+      )}
+
+      {/* All loaded indicator */}
+      {filteredEntries.length > 0 && filteredEntries.length <= visibleCount && visibleCount > PAGE_SIZE && (
+        <p style={{ textAlign: "center", fontSize: 12, color: "var(--text-dim)", padding: "4px 0 8px" }}>
+          All {filteredEntries.length} entries loaded
+        </p>
+      )}
     </div>
   );
 }

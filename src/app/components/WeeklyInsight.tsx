@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { format, subDays, startOfDay } from "date-fns";
+import { format } from "date-fns";
+import type { DateRange } from "@/app/page";
 
 interface Entry {
   content: string;
@@ -72,7 +73,7 @@ const STEPS = [
   "Crafting recommendations…",
 ];
 
-export default function WeeklyInsight({ userId }: { userId: string }) {
+export default function WeeklyInsight({ userId, dateRange }: { userId: string; dateRange: DateRange }) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -81,15 +82,17 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
   const [lastGenerated, setLastGenerated] = useState<Date | null>(null);
   const [step, setStep] = useState(0);
 
-  // Fetch last 7 days of entries
   useEffect(() => {
+    setLoadingEntries(true);
+    setInsight(null);
+    setError("");
     const fetchEntries = async () => {
-      const since = startOfDay(subDays(new Date(), 6)).toISOString();
       const { data, error: dbError } = await supabase
         .from("entries")
         .select("content, emotions, themes, sentiment_score, created_at")
         .eq("user_id", userId)
-        .gte("created_at", since)
+        .gte("created_at", dateRange.start.toISOString())
+        .lte("created_at", dateRange.end.toISOString())
         .order("created_at", { ascending: true });
 
       if (dbError) console.error(dbError);
@@ -97,7 +100,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
       setLoadingEntries(false);
     };
     fetchEntries();
-  }, [userId]);
+  }, [userId, dateRange]);
 
   const generate = async () => {
     if (entries.length < 1) return;
@@ -114,7 +117,12 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
       const res = await fetch("/api/weekly-insight", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entries }),
+        body: JSON.stringify({
+          entries,
+          dateLabel: dateRange.label,
+          startDate: format(dateRange.start, "MMMM d, yyyy"),
+          endDate: format(dateRange.end, "MMMM d, yyyy"),
+        }),
       });
 
       if (res.status === 429) {
@@ -294,15 +302,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
     );
   }
 
-  const firstDate = entries.length > 0 ? new Date(entries[0].created_at) : null;
-  const lastDate = entries.length > 0 ? new Date(entries[entries.length - 1].created_at) : null;
-  const sameDay =
-    firstDate && lastDate && format(firstDate, "yyyy-MM-dd") === format(lastDate, "yyyy-MM-dd");
-  const dateRange = firstDate
-    ? sameDay
-      ? format(firstDate, "MMM d, yyyy")
-      : `${format(firstDate, "MMM d")} – ${format(lastDate!, "MMM d, yyyy")}`
-    : "Last 7 days";
+  const rangeLabel = dateRange.label;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24, animation: "slideUp 0.4s ease" }}>
@@ -314,7 +314,7 @@ export default function WeeklyInsight({ userId }: { userId: string }) {
             {insight ? "Your Week in Review" : "Weekly Insight"}
           </h2>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ color: "var(--text-dim)", fontSize: 13 }}>{dateRange}</span>
+            <span style={{ color: "var(--text-dim)", fontSize: 13 }}>{rangeLabel}</span>
             <span style={{
               padding: "2px 10px", borderRadius: 100, fontSize: 12, fontWeight: 500,
               background: "var(--accent-dim)", color: "var(--accent)",

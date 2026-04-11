@@ -13,7 +13,12 @@ interface EntryInput {
 
 export async function POST(req: NextRequest) {
   try {
-    const { entries }: { entries: EntryInput[] } = await req.json()
+    const { entries, dateLabel, startDate, endDate }: {
+      entries: EntryInput[];
+      dateLabel?: string;
+      startDate?: string;
+      endDate?: string;
+    } = await req.json()
 
     if (!entries || entries.length === 0) {
       return NextResponse.json({ error: 'No entries provided' }, { status: 400 })
@@ -30,7 +35,11 @@ export async function POST(req: NextRequest) {
       })
       .join('\n\n---\n\n')
 
-    const prompt = `You are an emotional intelligence coach analyzing a user's week of journal entries. Based on the ${entries.length} entries below, generate a thoughtful weekly insight report. Return ONLY a valid JSON object with no markdown formatting, no code blocks, no extra text.
+    const periodDescription = dateLabel && startDate && endDate
+      ? `${dateLabel} (${startDate} to ${endDate})`
+      : "the selected period";
+
+    const prompt = `You are an emotional intelligence coach analyzing journal entries. Based on the ${entries.length} entries from ${periodDescription} below, generate a thoughtful insight report. Return ONLY a valid JSON object with no markdown formatting, no code blocks, no extra text.
 
 The JSON must have this exact structure:
 {
@@ -50,15 +59,15 @@ The JSON must have this exact structure:
 }
 
 Rules:
-- "emotional_trajectory": warm, empathetic narrative (2-3 sentences)
+- "emotional_trajectory": warm, empathetic narrative (2-3 sentences) covering the full period from ${startDate ?? "start"} to ${endDate ?? "end"}
 - "sentiment_trend": must be exactly one of: "improving", "declining", "stable"
 - "dominant_emotions": 2-4 most frequent emotions across entries
 - "patterns": 2-4 recurring behavioral or emotional patterns you observe
 - "habits.good": exactly 2 positive patterns or behaviors to reinforce
 - "habits.concerning": exactly 1-2 patterns worth watching (look for subtle ones like avoidance, venting without resolution, over-reliance on external validation, etc. — there is always at least one worth noting)
-- "recommendations": exactly 3 actionable, specific suggestions
+- "recommendations": exactly 3 actionable, specific suggestions grounded in what you observe from this specific period
 
-Journal entries from the past 7 days:
+Journal entries from ${periodDescription}:
 ---
 ${entrySummaries}
 ---`

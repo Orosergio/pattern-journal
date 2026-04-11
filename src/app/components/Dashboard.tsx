@@ -3,7 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
-import { format, differenceInCalendarDays, subDays, startOfDay, parseISO } from "date-fns";
+import { format, differenceInCalendarDays, subDays, parseISO } from "date-fns";
+import type { DateRange } from "@/app/page";
 
 interface Entry {
   id: string;
@@ -122,19 +123,23 @@ const cardStyle = {
   transition: "all 0.2s",
 };
 
-export default function Dashboard({ userId }: { userId: string }) {
+export default function Dashboard({ userId, dateRange }: { userId: string; dateRange: DateRange }) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    setLoading(true);
+    setError("");
     const fetchEntries = async () => {
       const { data, error: dbError } = await supabase
         .from("entries")
         .select("id, emotions, themes, sentiment_score, created_at")
         .eq("user_id", userId)
+        .gte("created_at", dateRange.start.toISOString())
+        .lte("created_at", dateRange.end.toISOString())
         .order("created_at", { ascending: false })
-        .limit(90);
+        .limit(500);
 
       if (dbError) {
         setError("Failed to load entries.");
@@ -144,22 +149,25 @@ export default function Dashboard({ userId }: { userId: string }) {
       setLoading(false);
     };
     fetchEntries();
-  }, [userId]);
+  }, [userId, dateRange]);
 
   const streakStats = useMemo(() => calcStreaks(entries), [entries]);
 
-  // Count unique calendar DAYS with at least 1 entry in the past 7 days
-  const daysJournaledThisWeek = useMemo(() => {
-    const since = startOfDay(subDays(new Date(), 6)).getTime();
+  // Unique days journaled within the selected range
+  const daysJournaled = useMemo(() => {
     const uniqueDays = new Set(
-      entries
-        .filter((e) => new Date(e.created_at).getTime() >= since)
-        .map((e) => format(new Date(e.created_at), "yyyy-MM-dd"))
+      entries.map((e) => format(new Date(e.created_at), "yyyy-MM-dd"))
     );
     return uniqueDays.size;
   }, [entries]);
 
-  const weeklyConsistency = Math.min(100, Math.round((daysJournaledThisWeek / 7) * 100));
+  // Total calendar days in the selected range (capped at today)
+  const totalRangeDays = useMemo(() => {
+    const ms = dateRange.end.getTime() - dateRange.start.getTime();
+    return Math.max(1, Math.round(ms / 86_400_000) + 1);
+  }, [dateRange]);
+
+  const consistency = Math.min(100, Math.round((daysJournaled / totalRangeDays) * 100));
 
   if (loading) {
     return (
@@ -249,16 +257,16 @@ export default function Dashboard({ userId }: { userId: string }) {
       color: "var(--violet)",
     },
     {
-      label: "This Week",
-      value: `${daysJournaledThisWeek}/7 days`,
+      label: "Days Journaled",
+      value: `${daysJournaled}/${totalRangeDays}d`,
       icon: DashIcons.calendar,
       color: "var(--accent)",
     },
     {
       label: "Consistency",
-      value: `${weeklyConsistency}%`,
+      value: `${consistency}%`,
       icon: DashIcons.trendUp,
-      color: weeklyConsistency >= 70 ? "var(--accent)" : weeklyConsistency >= 40 ? "var(--amber)" : "var(--rose)",
+      color: consistency >= 70 ? "var(--accent)" : consistency >= 40 ? "var(--amber)" : "var(--rose)",
     },
   ];
 
