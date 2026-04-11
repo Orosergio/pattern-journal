@@ -3,15 +3,37 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
+interface ContextData {
+    activity?: string
+    sleep?: string
+    weather?: string
+    caffeine?: boolean
+    screenTime?: string
+}
+
 export async function POST(req: NextRequest) {
     try {
-        const { content } = await req.json()
+        const { content, context } = await req.json() as { content: string; context?: ContextData }
 
         if (!content || content.trim().length === 0) {
             return NextResponse.json({ error: 'Content is required' }, { status: 400 })
         }
 
         const model = genAI.getGenerativeModel({ model: 'gemma-3-4b-it' })
+
+        // Build optional context block for the prompt
+        let contextBlock = ''
+        if (context && Object.keys(context).length > 0) {
+            const parts: string[] = []
+            if (context.activity) parts.push(`Physical activity today: ${context.activity}`)
+            if (context.sleep) parts.push(`Sleep quality: ${context.sleep}`)
+            if (context.weather) parts.push(`Weather: ${context.weather}`)
+            if (context.caffeine !== undefined) parts.push(`Had caffeine: ${context.caffeine ? 'Yes' : 'No'}`)
+            if (context.screenTime) parts.push(`Screen time: ${context.screenTime}`)
+            if (parts.length > 0) {
+                contextBlock = `\n\nAdditional context the user chose to log today:\n${parts.join('\n')}\n\nUse this context to enrich your analysis. If you see patterns (e.g., poor sleep correlating with negative sentiment), mention them in the coaching diagnosis or framework. Do NOT simply list the context back — weave it into your insights naturally.`
+            }
+        }
 
         const prompt = `You are an emotional intelligence analyst and personal development coach for a journaling app. Analyze the following journal entry and return ONLY a valid JSON object with no markdown formatting, no code blocks, no extra text.
 
@@ -40,7 +62,7 @@ Rules:
   - "action": a concrete suggestion someone could try — specific enough to be actionable, framed gently (e.g., "You might try…", "One option is…"). Not a command.
   - "why": connect the suggestion back to the framework. Explain the mechanism.
 
-Important: The insights should feel like they come from someone who has genuinely read and understood this specific entry — not a generic template. Introduce real concepts the person may not have encountered. The goal is to leave them feeling understood, not prescribed to.
+Important: The insights should feel like they come from someone who has genuinely read and understood this specific entry — not a generic template. Introduce real concepts the person may not have encountered. The goal is to leave them feeling understood, not prescribed to.${contextBlock}
 
 Journal entry:
 """

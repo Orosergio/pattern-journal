@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface CoachingResult {
@@ -18,6 +18,271 @@ interface AnalysisResult {
   coaching: CoachingResult;
 }
 
+interface ContextData {
+  activity?: string;
+  sleep?: string;
+  weather?: string;
+  caffeine?: boolean;
+  screenTime?: string;
+}
+
+// ─── Dynamic Prompt Logic ───────────────────────────────────────
+interface PromptConfig {
+  title: string;
+  subtitle: string;
+}
+
+function getPromptFromSentiment(avgSentiment: number | null, entryCount: number): PromptConfig {
+  if (entryCount === 0 || avgSentiment === null) {
+    return {
+      title: "How are you feeling today?",
+      subtitle: "Write whatever\u2019s on your mind. No pressure to be articulate.",
+    };
+  }
+  if (avgSentiment < -0.2) {
+    return {
+      title: "It\u2019s been a heavy week.",
+      subtitle: "What\u2019s one small thing that went well today? Even tiny wins count.",
+    };
+  }
+  if (avgSentiment > 0.2) {
+    return {
+      title: "You\u2019ve been in a good headspace lately.",
+      subtitle: "What\u2019s fueling that momentum? Let\u2019s capture it.",
+    };
+  }
+  return {
+    title: "What\u2019s on your mind right now?",
+    subtitle: "Check in with yourself \u2014 no filter needed.",
+  };
+}
+
+// ─── Voice Recognition Hook ────────────────────────────────────
+function useVoiceRecognition(onTranscript: (text: string) => void) {
+  const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
+  const [voiceError, setVoiceError] = useState("");
+  const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
+
+  function createRecognition() {
+    const SpeechRecognition =
+      (window as unknown as { SpeechRecognition?: typeof window.SpeechRecognition }).SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: typeof window.SpeechRecognition }).webkitSpeechRecognition;
+    if (!SpeechRecognition) return null;
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = "en-US";
+    return rec;
+  }
+
+  useEffect(() => {
+    const rec = createRecognition();
+    if (!rec) {
+      setIsSupported(false);
+      return;
+    }
+    recognitionRef.current = rec;
+
+    rec.onresult = (event: SpeechRecognitionEvent) => {
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript;
+        }
+      }
+      if (final) onTranscript(final);
+    };
+
+    rec.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (event.error === "not-allowed") {
+        setVoiceError("Microphone access denied. Please allow it in your browser settings.");
+      } else if (event.error !== "aborted") {
+        setVoiceError("Voice recognition error. Try again.");
+      }
+      setIsListening(false);
+    };
+
+    rec.onend = () => {
+      setIsListening(false);
+    };
+
+    return () => {
+      rec.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggle = useCallback(() => {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+    setVoiceError("");
+
+    if (isListening) {
+      rec.stop();
+      setIsListening(false);
+    } else {
+      try {
+        rec.start();
+        setIsListening(true);
+      } catch {
+        setVoiceError("Could not start voice recognition.");
+      }
+    }
+  }, [isListening]);
+
+  return { isListening, isSupported, voiceError, toggle };
+}
+
+// ─── SVG Icons (monochrome, 18x18) ────────────────────────────
+const Icons = {
+  activity: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    </svg>
+  ),
+  sleep: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  ),
+  sun: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  ),
+  coffee: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 8h1a4 4 0 1 1 0 8h-1" /><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" />
+      <line x1="6" y1="2" x2="6" y2="4" /><line x1="10" y1="2" x2="10" y2="4" /><line x1="14" y1="2" x2="14" y2="4" />
+    </svg>
+  ),
+  monitor: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  ),
+  mic: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  ),
+  stop: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+    </svg>
+  ),
+};
+
+// ─── Context Icon Button + Popover ─────────────────────────────
+interface ContextIconProps {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  activeColor: string;
+  activeBg: string;
+  children: React.ReactNode;
+}
+
+function ContextIconButton({ icon, label, active, activeColor, activeBg, children }: ContextIconProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(!open)}
+        title={label}
+        style={{
+          width: 38, height: 38, borderRadius: 10,
+          border: "none",
+          background: active ? activeBg : "transparent",
+          color: active ? activeColor : "var(--text-dim)",
+          cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all 0.18s",
+          position: "relative",
+        }}
+      >
+        {icon}
+        {active && (
+          <span style={{
+            position: "absolute", top: 4, right: 4,
+            width: 5, height: 5, borderRadius: "50%",
+            background: activeColor,
+          }} />
+        )}
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", left: "50%",
+          transform: "translateX(-50%)",
+          background: "#1a1a1e", border: "1px solid rgba(255,255,255,0.06)",
+          borderRadius: 12, padding: 6,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          zIndex: 100,
+          minWidth: 120,
+          animation: "popIn 0.15s ease",
+        }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Popover option button
+function PopoverOption({
+  label,
+  active,
+  activeColor,
+  activeBg,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  activeColor: string;
+  activeBg: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: "block", width: "100%", textAlign: "left",
+        padding: "7px 12px", borderRadius: 8,
+        fontSize: 12, fontWeight: active ? 600 : 400,
+        fontFamily: "var(--sans)",
+        background: active ? activeBg : "transparent",
+        color: active ? activeColor : "var(--text-muted)",
+        border: "none", cursor: "pointer",
+        transition: "all 0.12s",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+
+// ─── Main Component ────────────────────────────────────────────
 export default function JournalEntry({ userId }: { userId: string }) {
   const [content, setContent] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
@@ -26,11 +291,86 @@ export default function JournalEntry({ userId }: { userId: string }) {
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"express" | "reflect" | "guide">("reflect");
 
+  // Context state
+  const [activity, setActivity] = useState("");
+  const [sleep, setSleep] = useState("");
+  const [weather, setWeather] = useState("");
+  const [caffeine, setCaffeine] = useState(false);
+  const [screenTime, setScreenTime] = useState("");
+
+  // Dynamic prompt state
+  const [recentSentiment, setRecentSentiment] = useState<number | null>(null);
+  const [recentCount, setRecentCount] = useState(0);
+
+  // Voice recognition
+  const handleVoiceTranscript = useCallback(
+    (text: string) => {
+      setContent((prev) => (prev ? prev + " " + text : text));
+    },
+    []
+  );
+  const voice = useVoiceRecognition(handleVoiceTranscript);
+
+  // Fetch recent entries for dynamic prompt
+  useEffect(() => {
+    const fetchRecent = async () => {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { data } = await supabase
+        .from("entries")
+        .select("sentiment_score")
+        .eq("user_id", userId)
+        .gte("created_at", sevenDaysAgo.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (data && data.length > 0) {
+        const avg = data.reduce((sum: number, e: { sentiment_score: number }) => sum + (e.sentiment_score ?? 0), 0) / data.length;
+        setRecentSentiment(avg);
+        setRecentCount(data.length);
+      }
+    };
+    fetchRecent();
+  }, [userId]);
+
+  const dynamicPrompt = useMemo(
+    () => getPromptFromSentiment(recentSentiment, recentCount),
+    [recentSentiment, recentCount]
+  );
+
+  // Build context object for submission
+  const buildContext = (): ContextData | undefined => {
+    const ctx: ContextData = {};
+    let hasAny = false;
+
+    if (activity) { ctx.activity = activity; hasAny = true; }
+    if (sleep) { ctx.sleep = sleep; hasAny = true; }
+    if (weather) { ctx.weather = weather; hasAny = true; }
+    if (caffeine) { ctx.caffeine = true; hasAny = true; }
+    if (screenTime) { ctx.screenTime = screenTime; hasAny = true; }
+
+    return hasAny ? ctx : undefined;
+  };
+
+  const contextCount = useMemo(() => {
+    let count = 0;
+    if (activity) count++;
+    if (sleep) count++;
+    if (weather) count++;
+    if (caffeine) count++;
+    if (screenTime) count++;
+    return count;
+  }, [activity, sleep, weather, caffeine, screenTime]);
+
   const handleSubmit = async () => {
     if (content.trim().length < 20) {
       setError("Write at least 20 characters for meaningful analysis.");
       return;
     }
+
+    // Stop voice if still listening
+    if (voice.isListening) voice.toggle();
 
     setAnalyzing(true);
     setError("");
@@ -38,10 +378,12 @@ export default function JournalEntry({ userId }: { userId: string }) {
     setSaved(false);
 
     try {
+      const context = buildContext();
+
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, context }),
       });
 
       if (res.status === 429) {
@@ -71,6 +413,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
         sentiment_score: result.sentiment_score,
         reflection_prompt: result.reflection_prompt,
         coaching: result.coaching,
+        context: context || null,
       });
 
       if (dbError) throw dbError;
@@ -88,6 +431,11 @@ export default function JournalEntry({ userId }: { userId: string }) {
     setAnalysis(null);
     setSaved(false);
     setError("");
+    setActivity("");
+    setSleep("");
+    setWeather("");
+    setCaffeine(false);
+    setScreenTime("");
   };
 
   const getSentimentColor = (score: number) => {
@@ -111,18 +459,27 @@ export default function JournalEntry({ userId }: { userId: string }) {
     { bg: "var(--amber-dim)", color: "var(--amber)", border: "rgba(251,191,36,0.15)" },
   ];
 
+  // ─── Color configs for each context category ─────────────
+  const ctxColors = {
+    activity: { color: "#6ee7b7", bg: "rgba(110,231,183,0.1)" },
+    sleep: { color: "#a78bfa", bg: "rgba(167,139,250,0.1)" },
+    weather: { color: "#fbbf24", bg: "rgba(251,191,36,0.1)" },
+    caffeine: { color: "#fb923c", bg: "rgba(251,146,60,0.1)" },
+    screen: { color: "#fb7185", bg: "rgba(251,113,133,0.1)" },
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 28, animation: "slideUp 0.4s ease" }}>
-      {/* Header */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, animation: "slideUp 0.4s ease" }}>
+      {/* ── Dynamic Header ── */}
       <div>
         <h2 style={{
           fontFamily: "var(--serif)", fontSize: "clamp(24px, 4vw, 32px)",
           fontWeight: 400, marginBottom: 8, lineHeight: 1.2
         }}>
-          How are you feeling today?
+          {dynamicPrompt.title}
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.5 }}>
-          Write whatever&apos;s on your mind. No pressure to be articulate.
+          {dynamicPrompt.subtitle}
         </p>
       </div>
 
@@ -158,28 +515,212 @@ export default function JournalEntry({ userId }: { userId: string }) {
         </span>
       </div>
 
-      {/* Textarea */}
-      <div style={{ position: "relative" }}>
+      {/* ── Context Icon Bar + Textarea ── */}
+      <div style={{
+        background: "rgba(255,255,255,0.015)",
+        borderRadius: 16,
+        overflow: "visible",
+      }}>
+        {/* Compact icon bar */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 2,
+          padding: "6px 8px",
+          borderBottom: "1px solid rgba(255,255,255,0.04)",
+        }}>
+          {/* Activity */}
+          <ContextIconButton
+            icon={Icons.activity}
+            label="Activity"
+            active={!!activity}
+            activeColor={ctxColors.activity.color}
+            activeBg={ctxColors.activity.bg}
+          >
+            {["Gym", "Running", "Yoga", "Bouldering", "Walking", "Swimming"].map((opt) => (
+              <PopoverOption
+                key={opt}
+                label={opt}
+                active={activity === opt.toLowerCase()}
+                activeColor={ctxColors.activity.color}
+                activeBg={ctxColors.activity.bg}
+                onClick={() => setActivity(activity === opt.toLowerCase() ? "" : opt.toLowerCase())}
+              />
+            ))}
+          </ContextIconButton>
+
+          {/* Sleep */}
+          <ContextIconButton
+            icon={Icons.sleep}
+            label="Sleep"
+            active={!!sleep}
+            activeColor={ctxColors.sleep.color}
+            activeBg={ctxColors.sleep.bg}
+          >
+            {[
+              { key: "poor", label: "Poor" },
+              { key: "okay", label: "Okay" },
+              { key: "great", label: "Great" },
+            ].map((opt) => (
+              <PopoverOption
+                key={opt.key}
+                label={opt.label}
+                active={sleep === opt.key}
+                activeColor={ctxColors.sleep.color}
+                activeBg={ctxColors.sleep.bg}
+                onClick={() => setSleep(sleep === opt.key ? "" : opt.key)}
+              />
+            ))}
+          </ContextIconButton>
+
+          {/* Weather */}
+          <ContextIconButton
+            icon={Icons.sun}
+            label="Weather"
+            active={!!weather}
+            activeColor={ctxColors.weather.color}
+            activeBg={ctxColors.weather.bg}
+          >
+            {[
+              { key: "sunny", label: "Sunny" },
+              { key: "cloudy", label: "Cloudy" },
+              { key: "rainy", label: "Rainy" },
+              { key: "snowy", label: "Snowy" },
+            ].map((opt) => (
+              <PopoverOption
+                key={opt.key}
+                label={opt.label}
+                active={weather === opt.key}
+                activeColor={ctxColors.weather.color}
+                activeBg={ctxColors.weather.bg}
+                onClick={() => setWeather(weather === opt.key ? "" : opt.key)}
+              />
+            ))}
+          </ContextIconButton>
+
+          {/* Caffeine (simple toggle — no popover) */}
+          <button
+            onClick={() => setCaffeine(!caffeine)}
+            title="Caffeine"
+            style={{
+              width: 38, height: 38, borderRadius: 10,
+              border: "none",
+              background: caffeine ? ctxColors.caffeine.bg : "transparent",
+              color: caffeine ? ctxColors.caffeine.color : "var(--text-dim)",
+              cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.18s",
+              position: "relative",
+            }}
+          >
+            {Icons.coffee}
+            {caffeine && (
+              <span style={{
+                position: "absolute", top: 4, right: 4,
+                width: 5, height: 5, borderRadius: "50%",
+                background: ctxColors.caffeine.color,
+              }} />
+            )}
+          </button>
+
+          {/* Screen time */}
+          <ContextIconButton
+            icon={Icons.monitor}
+            label="Screen time"
+            active={!!screenTime}
+            activeColor={ctxColors.screen.color}
+            activeBg={ctxColors.screen.bg}
+          >
+            {[
+              { key: "low", label: "Low" },
+              { key: "moderate", label: "Moderate" },
+              { key: "high", label: "High" },
+            ].map((opt) => (
+              <PopoverOption
+                key={opt.key}
+                label={opt.label}
+                active={screenTime === opt.key}
+                activeColor={ctxColors.screen.color}
+                activeBg={ctxColors.screen.bg}
+                onClick={() => setScreenTime(screenTime === opt.key ? "" : opt.key)}
+              />
+            ))}
+          </ContextIconButton>
+
+          {/* Divider */}
+          <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.06)", margin: "0 4px" }} />
+
+          {/* Context summary */}
+          {contextCount > 0 ? (
+            <span style={{
+              fontSize: 11, color: "var(--text-dim)",
+              padding: "3px 8px", borderRadius: 6,
+              background: "rgba(255,255,255,0.03)",
+            }}>
+              {contextCount} logged
+            </span>
+          ) : (
+            <span style={{ fontSize: 11, color: "var(--text-dim)", opacity: 0.5 }}>
+              Add context
+            </span>
+          )}
+
+          {/* Spacer + Voice button */}
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
+            {voice.isListening && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 5,
+                animation: "fadeIn 0.3s ease",
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: "50%", background: "var(--rose)",
+                  animation: "pulse 1s ease-in-out infinite",
+                }} />
+                <span style={{ fontSize: 11, color: "var(--rose)", fontWeight: 600 }}>
+                  Listening
+                </span>
+              </div>
+            )}
+            {voice.isSupported && (
+              <button
+                onClick={voice.toggle}
+                title={voice.isListening ? "Stop recording" : "Start voice input"}
+                style={{
+                  width: 38, height: 38, borderRadius: 10,
+                  border: "none",
+                  background: voice.isListening ? "rgba(251,113,133,0.15)" : "transparent",
+                  color: voice.isListening ? "var(--rose)" : "var(--text-dim)",
+                  cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "all 0.18s",
+                }}
+              >
+                {voice.isListening ? Icons.stop : Icons.mic}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Textarea */}
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Today I felt..."
           style={{
             width: "100%", minHeight: 200, maxHeight: 400,
-            background: "var(--bg-card)", border: "1px solid var(--border)",
-            borderRadius: 14, padding: "20px",
+            background: "transparent",
+            border: "none",
+            borderRadius: "0 0 16px 16px",
+            padding: "16px 20px",
             color: "var(--text)", fontSize: 15, lineHeight: 1.7,
             fontFamily: "var(--sans)",
             resize: "vertical",
             outline: "none",
-            transition: "border-color 0.2s",
           }}
-          onFocus={(e) => e.target.style.borderColor = "var(--border-focus)"}
-          onBlur={(e) => e.target.style.borderColor = "var(--border)"}
         />
+
+        {/* Character count bar */}
         <div style={{
-          position: "absolute", bottom: 16, left: 20,
-          fontSize: 12, color: "var(--text-dim)"
+          padding: "0 20px 12px",
+          fontSize: 12, color: "var(--text-dim)",
         }}>
           {content.length} characters
           {content.length > 0 && content.length < 20 && (
@@ -189,6 +730,29 @@ export default function JournalEntry({ userId }: { userId: string }) {
           )}
         </div>
       </div>
+
+      {/* Voice not supported */}
+      {!voice.isSupported && (
+        <div style={{
+          fontSize: 12, color: "var(--text-dim)", display: "flex", alignItems: "center", gap: 6,
+          marginTop: -12,
+        }}>
+          {Icons.mic}
+          Voice input not supported in this browser. Try Chrome, Edge, or Safari.
+        </div>
+      )}
+
+      {/* Voice error */}
+      {voice.voiceError && (
+        <div style={{
+          background: "var(--rose-dim)", border: "1px solid rgba(251,113,133,0.15)",
+          borderRadius: 10, padding: "10px 14px",
+          fontSize: 12, color: "var(--rose)", lineHeight: 1.5,
+          marginTop: -12,
+        }}>
+          {voice.voiceError}
+        </div>
+      )}
 
       {/* Actions */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, alignItems: "center" }}>
@@ -263,6 +827,11 @@ export default function JournalEntry({ userId }: { userId: string }) {
               fontWeight: 500, display: "flex", alignItems: "center", gap: 8
             }}>
               <span>✓</span> Entry saved successfully
+              {contextCount > 0 && (
+                <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-dim)" }}>
+                  + {contextCount} context {contextCount === 1 ? "factor" : "factors"} logged
+                </span>
+              )}
             </div>
           )}
 
@@ -410,7 +979,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
                     </p>
                   </div>
 
-                  {/* Framework — renamed */}
+                  {/* Framework */}
                   <div style={{
                     background: "var(--accent-dim)",
                     border: "1px solid rgba(110,231,183,0.12)",
@@ -430,7 +999,7 @@ export default function JournalEntry({ userId }: { userId: string }) {
                     </p>
                   </div>
 
-                  {/* Action — only in guide mode, marked optional */}
+                  {/* Action — only in guide mode */}
                   {mode === "guide" && (
                     <div style={{
                       background: "var(--bg-card)",
@@ -514,7 +1083,13 @@ export default function JournalEntry({ userId }: { userId: string }) {
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.05); }
+        }
+      `}</style>
     </div>
   );
 }
