@@ -322,6 +322,24 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* Mobile date range bar — shown below header, hidden on desktop */}
+      {activeTab !== "write" && (
+        <div
+          className="mobile-date-bar"
+          style={{
+            display: "none",
+            position: "sticky", top: 60, zIndex: 39,
+            background: "rgba(246,243,238,0.95)", backdropFilter: "blur(20px)",
+            borderBottom: "1px solid var(--border)",
+            padding: "8px 16px",
+            justifyContent: "flex-end",
+            alignItems: "center",
+          }}
+        >
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
+        </div>
+      )}
+
       {/* Content */}
       <main
         className="main-content"
@@ -368,15 +386,17 @@ export default function Home() {
       </nav>
 
       <style>{`
-        /* Mobile: hide desktop tab nav, show bottom nav */
+        /* Mobile: hide desktop tab nav, show bottom nav + date bar */
         @media (max-width: 640px) {
           .desktop-tab-nav { display: none !important; }
           .mobile-bottom-nav { display: flex !important; }
+          .mobile-date-bar { display: flex !important; }
           .hide-mobile { display: none !important; }
-          .main-content { padding-bottom: 90px !important; }
+          .main-content { padding-bottom: 90px !important; padding-top: 16px !important; }
         }
         @media (min-width: 641px) {
           .desktop-tab-nav { display: block !important; }
+          .mobile-date-bar { display: none !important; }
           .hide-mobile { display: inline !important; }
         }
       `}</style>
