@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 
 interface EntryInput {
   content: string
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No entries provided' }, { status: 400 })
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemma-3-4b-it' })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 
     const entrySummaries = entries
       .map((e, i) => {

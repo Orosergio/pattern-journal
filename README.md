@@ -12,7 +12,7 @@ Write freely. The AI reads between the lines.
 
 ## What It Does
 
-Every journal entry gets analyzed by **Google Gemma 3 4B** in real time. No templates, no prompts to fill, just write what's on your mind and the AI surfaces what you can't see yourself.
+Every journal entry gets analyzed by **Gemini 2.5 Flash** in real time. No templates, no prompts to fill, just write what's on your mind and the AI surfaces what you can't see yourself.
 
 **Per entry**, the AI returns:
 - 2-4 detected **emotions** (e.g. anxiety, excitement, relief)
@@ -64,7 +64,7 @@ Every journal entry gets analyzed by **Google Gemma 3 4B** in real time. No temp
 | Framework | **Next.js 14** (App Router) + **TypeScript** |
 | Auth | **Supabase** (Google OAuth) |
 | Database | **Supabase PostgreSQL** with Row Level Security |
-| AI Model | **Google Gemma 3 4B** (`gemma-3-4b-it`) via Google AI Studio API |
+| AI Model | **Gemini 2.5 Flash** (`gemini-2.5-flash`) via Google AI Studio API |
 | Charts | **Recharts** |
 | Hosting | **Vercel** (auto-deploy on push) |
 | Design | **DM Serif Display** + **Instrument Sans**, dark theme, emerald/violet/rose/amber accents |
@@ -78,7 +78,7 @@ Browser (Next.js Client)
   │
   ├── Google OAuth ──► Supabase Auth
   │
-  ├── Write Entry ──► /api/analyze ──► Google AI Studio (Gemma 3 4B)
+  ├── Write Entry ──► /api/analyze ──► Google AI Studio (Gemini 2.5 Flash)
   │                        │
   │                        ▼
   │                   Returns: emotions[], themes[],
@@ -88,7 +88,7 @@ Browser (Next.js Client)
   │
   ├── Dashboard ──► Aggregates entries → Recharts visualizations
   │
-  └── Insights ──► /api/weekly-insight ──► Gemma 3 4B (meta-analysis)
+  └── Insights ──► /api/weekly-insight ──► Gemini 2.5 Flash (meta-analysis)
                         │
                         ▼
                    Returns: trajectory, patterns[],
@@ -97,7 +97,7 @@ Browser (Next.js Client)
 ```
 
 Key decisions:
-- **Gemma 3 4B over larger models** - Free tier, fast inference, good enough for emotion detection. The 4B parameter model keeps latency under 3s per analysis.
+- **Gemini 2.5 Flash over larger models** - Fast inference, reliable structured output, and good enough for emotion detection. The model keeps latency low for per-entry analysis.
 - **Server-side API routes** - API key never touches the client. All AI calls go through Next.js API routes.
 - **Row Level Security** - Each user only sees their own entries. Enforced at the database level, not just the app level.
 - **No external state management** - React state + Supabase real-time queries. Simple is fast.
@@ -136,7 +136,7 @@ Open [localhost:3000](http://localhost:3000).
 ### Getting API Keys
 
 1. **Supabase**: Create a project at [supabase.com](https://supabase.com), enable Google OAuth, copy URL + anon key
-2. **Google AI Studio**: Get a free API key at [aistudio.google.com](https://aistudio.google.com) — Gemma 3 4B is free tier
+2. **Google AI Studio**: Get an API key at [aistudio.google.com](https://aistudio.google.com). The default model is `gemini-2.5-flash`; override it with `GEMINI_MODEL` if needed.
 
 ---
 
@@ -166,7 +166,7 @@ src/app/
 
 This was a solo build from zero to production. Some things that clicked:
 
-- **Prompt engineering for structured output** - Getting Gemma 3 4B to consistently return valid JSON with emotions, themes, and sentiment took careful prompt design. Smaller models need tighter constraints.
+- **Prompt engineering for structured output** - Getting the AI to consistently return valid JSON with emotions, themes, and sentiment took careful prompt design. Smaller and faster models need tighter constraints.
 - **Supabase RLS is underrated** - Writing security policies in SQL that enforce per-user data isolation at the database level means the app code can stay simple without compromising security.
 - **AI meta-analysis is the real product** - Individual entry analysis is cool, but the Weekly Insight that cross-references all entries to find patterns is what makes this genuinely useful. That's where the value is.
 - **Design matters for portfolio projects** - Recruiters spend 10 seconds on your repo. A polished UI with a real design system (not default Tailwind) makes them stop scrolling.
