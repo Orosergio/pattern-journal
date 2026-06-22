@@ -164,7 +164,7 @@ export default function LandingPage() {
                         maxWidth: 520, marginTop: 28, opacity: 0,
                         animation: "landSlideUp 0.8s ease forwards", animationDelay: "0.6s"
                     }}>
-                        Write freely. AI detects emotional patterns across your entries — surfacing recurring themes, sentiment shifts, and reflection prompts you'd miss on your own.
+                        Write freely. AI detects emotional patterns across your entries — surfacing recurring themes, sentiment shifts, and reflection prompts you&apos;d miss on your own.
                     </p>
 
                     <div className="land-cta-buttons" style={{

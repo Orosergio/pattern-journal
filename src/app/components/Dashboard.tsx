@@ -129,9 +129,12 @@ export default function Dashboard({ userId, dateRange }: { userId: string; dateR
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
+    let cancelled = false;
+
     const fetchEntries = async () => {
+      setLoading(true);
+      setError("");
+
       const { data, error: dbError } = await supabase
         .from("entries")
         .select("id, emotions, themes, sentiment_score, created_at")
@@ -141,6 +144,8 @@ export default function Dashboard({ userId, dateRange }: { userId: string; dateR
         .order("created_at", { ascending: false })
         .limit(500);
 
+      if (cancelled) return;
+
       if (dbError) {
         setError("Failed to load entries.");
         console.error(dbError);
@@ -148,7 +153,12 @@ export default function Dashboard({ userId, dateRange }: { userId: string; dateR
       setEntries(data || []);
       setLoading(false);
     };
-    fetchEntries();
+
+    void fetchEntries();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId, dateRange]);
 
   const streakStats = useMemo(() => calcStreaks(entries), [entries]);

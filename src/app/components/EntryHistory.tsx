@@ -44,13 +44,16 @@ export default function EntryHistory({ userId, dateRange }: { userId: string; da
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
-    // Reset view state when range changes
-    setSelectedTag(null);
-    setSearchQuery("");
-    setVisibleCount(PAGE_SIZE);
+    let cancelled = false;
+
     const fetchEntries = async () => {
+      setLoading(true);
+      setError("");
+      // Reset view state when range changes
+      setSelectedTag(null);
+      setSearchQuery("");
+      setVisibleCount(PAGE_SIZE);
+
       const { data, error: dbError } = await supabase
         .from("entries")
         .select("*")
@@ -60,6 +63,8 @@ export default function EntryHistory({ userId, dateRange }: { userId: string; da
         .order("created_at", { ascending: false })
         .limit(500);
 
+      if (cancelled) return;
+
       if (dbError) {
         setError("Failed to load entries.");
         console.error(dbError);
@@ -67,7 +72,12 @@ export default function EntryHistory({ userId, dateRange }: { userId: string; da
       setEntries(data || []);
       setLoading(false);
     };
-    fetchEntries();
+
+    void fetchEntries();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId, dateRange]);
 
   // Theme frequency
