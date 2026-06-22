@@ -5,7 +5,7 @@
 Write freely. The AI reads between the lines.
 
 [![Live Demo](https://img.shields.io/badge/Live-pattern--journal.vercel.app-6ee7b7?style=for-the-badge)](https://pattern-journal.vercel.app)
-[![Built With](https://img.shields.io/badge/AI-Google%20Gemma%203%204B-4285F4?style=for-the-badge)](https://ai.google.dev/)
+[![Built With](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-4285F4?style=for-the-badge)](https://ai.google.dev/)
 [![Deploy](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
 
 ---
@@ -35,7 +35,9 @@ Every journal entry gets analyzed by **Gemini 2.5 Flash** in real time. No templ
 
 ---
 
-## Screenshots
+## Current Screenshots
+
+These screenshots reflect the current restored system after the Supabase project was brought back online and the AI routes were updated to a supported Gemini model.
 
 ### Landing Page
 ![Landing Page](./screenshots/landing.png)
@@ -52,22 +54,17 @@ Every journal entry gets analyzed by **Gemini 2.5 Flash** in real time. No templ
 ### Weekly Insight Report
 ![Insights](./screenshots/insights.png)
 
-### Actionable Recommendations
-![Recommendations](./screenshots/recommendations.png)
-
----
-
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | **Next.js 14** (App Router) + **TypeScript** |
+| Framework | **Next.js 16** (App Router) + **React 19** + **TypeScript** |
 | Auth | **Supabase** (Google OAuth) |
 | Database | **Supabase PostgreSQL** with Row Level Security |
 | AI Model | **Gemini 2.5 Flash** (`gemini-2.5-flash`) via Google AI Studio API |
 | Charts | **Recharts** |
 | Hosting | **Vercel** (auto-deploy on push) |
-| Design | **DM Serif Display** + **Instrument Sans**, dark theme, emerald/violet/rose/amber accents |
+| Design | **DM Serif Display** + **Instrument Sans**, warm light theme, sage/violet/rose/amber accents |
 
 ---
 
@@ -124,6 +121,9 @@ Fill in `.env.local`:
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 GEMINI_API_KEY=your_google_ai_studio_key
+
+# Optional - defaults to gemini-2.5-flash
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ```bash
@@ -137,6 +137,7 @@ Open [localhost:3000](http://localhost:3000).
 
 1. **Supabase**: Create a project at [supabase.com](https://supabase.com), enable Google OAuth, copy URL + anon key
 2. **Google AI Studio**: Get an API key at [aistudio.google.com](https://aistudio.google.com). The default model is `gemini-2.5-flash`; override it with `GEMINI_MODEL` if needed.
+3. **Paused Supabase projects**: If auth redirects fail with DNS errors, restore the Supabase project and wait until it is `ACTIVE_HEALTHY`.
 
 ---
 
@@ -193,4 +194,4 @@ NTUT (National Taipei University of Technology) · Taipei, Taiwan
 
 ---
 
-*Built with real journal entries, real emotions, and a 4B parameter model that punches above its weight.*
+*Built with real journal entries, real emotions, and a working AI analysis flow.*
